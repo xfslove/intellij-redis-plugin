@@ -18,6 +18,9 @@ dependencies {
     implementation group: 'io.lettuce', name: 'lettuce-core', version: '5.1.6.RELEASE'
 }
 
+// Include the generated files in the source set
+sourceSets.main.java.srcDirs 'src/main/gen'
+
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
     version '2019.3.4'

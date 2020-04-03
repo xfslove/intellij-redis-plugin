@@ -1,0 +1,39 @@
+{
+  parserClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Redis"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.xfslove.intellij.plugin.redis.lang.psi"
+  psiImplPackage="com.github.xfslove.intellij.plugin.redis.lang.psi"
+
+  elementTypeHolderClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisTypes"
+  elementTypeClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisElementType"
+  tokenTypeClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisTokenType"
+
+  psiImplUtilClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisPsiImplUtil"
+
+  tokens = [
+    COMMENT = "regexp://.*"
+    CRLF = "regexp:\s+"
+    COMMAND = "regexp:(DEL|HGET|HSET|EXISTS|KEYS|SCAN)"
+    FIELD = "regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
+    VALUE = "regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
+  ]
+
+}
+
+simpleFile ::= item_*
+
+private item_ ::= property|COMMENT
+
+property ::= COMMAND FIELD? VALUE? {
+  pin=1
+  recoverWhile="recover_property"
+  mixin="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisNamedElementImpl"
+  implements="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisNamedElement"
+  methods=[getName setName getNameIdentifier getPresentation]
+}
+
+private recover_property ::= !(COMMAND|COMMENT)
