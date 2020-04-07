@@ -20,6 +20,7 @@
         <toolWindow id="redisExplorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ExplorerPanelFactory"/>
 
         <fileType name="Redis File" language="REDIS" extensions="redis" fieldName="INSTANCE" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisFileType"/>
+        <editorNotificationProvider implementation="com.github.xfslove.intellij.plugin.redis.CommandEditorPanelProvider"/>
     </extensions>
 
     <actions>
