@@ -10,14 +10,16 @@
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.client.RedisClient"/>
         <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage"/>
 
-        <toolWindow id="Redis Explorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ExplorerPanelFactory"/>
+        <toolWindow id="redisExplorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ExplorerPanelFactory"/>
 
+        <fileType name="Redis File" language="REDIS" extensions="redis" fieldName="INSTANCE" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisFileType"/>
     </extensions>
 
     <actions>

@@ -2,6 +2,7 @@ package com.github.xfslove.intellij.plugin.redis;
 
 import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
+import com.github.xfslove.intellij.plugin.redis.action.ExecuteCommandAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
 import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
@@ -16,7 +17,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.tree.TreeUtil;
-import org.apache.commons.lang.StringUtils;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -63,6 +63,8 @@ public class ExplorerPanel extends JPanel {
     actionGroup.add(new NewConnectionAction(this));
     actionGroup.add(new DeleteConnectionAction(this));
     actionGroup.add(new EditConnectionAction(this));
+    actionGroup.add(new Separator());
+    actionGroup.add(new ExecuteCommandAction(this));
     actionGroup.add(new Separator());
     actionGroup.add(actionsManager.createExpandAllAction(redisServersExpander, rootPanel));
     actionGroup.add(actionsManager.createCollapseAllAction(redisServersExpander, rootPanel));

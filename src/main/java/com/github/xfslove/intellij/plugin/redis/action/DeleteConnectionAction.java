@@ -23,4 +23,11 @@ public class DeleteConnectionAction extends DumbAwareAction {
   public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
     explorerPanel.deleteSelectedConfiguration();
   }
+
+  @Override
+  public void update(@NotNull AnActionEvent e) {
+
+    e.getPresentation().setVisible(explorerPanel.getSelectedConfiguration() != null);
+
+  }
 }

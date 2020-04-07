@@ -2,7 +2,6 @@
 
 package com.github.xfslove.intellij.plugin.redis.lang.psi;
 
-import com.github.xfslove.intellij.plugin.redis.psi.RedisProperty;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFileFactory;

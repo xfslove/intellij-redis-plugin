@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.github.xfslove.intellij.plugin.redis.lang.psi.RedisTypes.*;
+import com.intellij.navigation.ItemPresentation;
 
 public class RedisPropertyImpl extends RedisNamedElementImpl implements RedisProperty {
 
@@ -40,6 +41,26 @@ public class RedisPropertyImpl extends RedisNamedElementImpl implements RedisPro
   @Nullable
   public PsiElement getValue() {
     return findChildByType(VALUE);
+  }
+
+  @Override
+  public String getName() {
+    return RedisPsiImplUtil.getName(this);
+  }
+
+  @Override
+  public PsiElement setName(String newName) {
+    return RedisPsiImplUtil.setName(this, newName);
+  }
+
+  @Override
+  public PsiElement getNameIdentifier() {
+    return RedisPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public ItemPresentation getPresentation() {
+    return RedisPsiImplUtil.getPresentation(this);
   }
 
 }

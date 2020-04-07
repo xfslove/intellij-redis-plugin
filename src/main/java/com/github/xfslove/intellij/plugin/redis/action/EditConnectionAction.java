@@ -28,10 +28,6 @@ public class EditConnectionAction extends DumbAwareAction {
 
     Configuration configuration = explorerPanel.getSelectedConfiguration();
 
-    if (configuration == null) {
-      return;
-    }
-
     Configuration clone = new Configuration();
     clone.setName(configuration.getName());
     clone.setUrl(configuration.getUrl());
@@ -43,6 +39,13 @@ public class EditConnectionAction extends DumbAwareAction {
     if (dialog.isOK()) {
       explorerPanel.reloadConfiguration(clone);
     }
+
+  }
+
+  @Override
+  public void update(@NotNull AnActionEvent e) {
+
+    e.getPresentation().setVisible(explorerPanel.getSelectedConfiguration() != null);
 
   }
 }

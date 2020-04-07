@@ -23,7 +23,9 @@ sourceSets.main.java.srcDirs 'src/main/gen'
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
+//    type 'IU'
     version '2019.3.4'
+    plugins "java"
 }
 patchPluginXml {
     changeNotes """

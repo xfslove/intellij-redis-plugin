@@ -4,6 +4,7 @@ package com.github.xfslove.intellij.plugin.redis.lang.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.navigation.ItemPresentation;
 
 public interface RedisProperty extends RedisNamedElement {
 
@@ -16,20 +17,12 @@ public interface RedisProperty extends RedisNamedElement {
   @Nullable
   PsiElement getValue();
 
-  //WARNING: getName(...) is skipped
-  //matching getName(RedisProperty, ...)
-  //methods are not found in RedisPsiImplUtil
+  String getName();
 
-  //WARNING: setName(...) is skipped
-  //matching setName(RedisProperty, ...)
-  //methods are not found in RedisPsiImplUtil
+  PsiElement setName(String newName);
 
-  //WARNING: getNameIdentifier(...) is skipped
-  //matching getNameIdentifier(RedisProperty, ...)
-  //methods are not found in RedisPsiImplUtil
+  PsiElement getNameIdentifier();
 
-  //WARNING: getPresentation(...) is skipped
-  //matching getPresentation(RedisProperty, ...)
-  //methods are not found in RedisPsiImplUtil
+  ItemPresentation getPresentation();
 
 }
