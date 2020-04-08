@@ -32,85 +32,77 @@ public class RedisParser implements PsiParser, LightPsiParser {
   }
 
   static boolean parse_root_(IElementType t, PsiBuilder b, int l) {
-    return simpleFile(b, l + 1);
+    return redisPluginFile(b, l + 1);
   }
 
   /* ********************************************************** */
-  // property|COMMENT
-  static boolean item_(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "item_")) return false;
-    if (!nextTokenIs(b, "", COMMAND, COMMENT)) return false;
+  // KEY FIELD FIELD?
+  public static boolean command(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "command")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, COMMAND, "<command>");
+    r = consumeTokens(b, 1, KEY, FIELD);
+    p = r; // pin = 1
+    r = r && command_2(b, l + 1);
+    exit_section_(b, l, m, r, p, recover_command_parser_);
+    return r || p;
+  }
+
+  // FIELD?
+  private static boolean command_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "command_2")) return false;
+    consumeToken(b, FIELD);
+    return true;
+  }
+
+  /* ********************************************************** */
+  // command|COMMENT
+  static boolean command_(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "command_")) return false;
+    if (!nextTokenIs(b, "", COMMENT, KEY)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = property(b, l + 1);
+    r = command(b, l + 1);
     if (!r) r = consumeToken(b, COMMENT);
     exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // COMMAND FIELD? VALUE?
-  public static boolean property(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property")) return false;
-    boolean r, p;
-    Marker m = enter_section_(b, l, _NONE_, PROPERTY, "<property>");
-    r = consumeToken(b, COMMAND);
-    p = r; // pin = 1
-    r = r && report_error_(b, property_1(b, l + 1));
-    r = p && property_2(b, l + 1) && r;
-    exit_section_(b, l, m, r, p, recover_property_parser_);
-    return r || p;
-  }
-
-  // FIELD?
-  private static boolean property_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property_1")) return false;
-    consumeToken(b, FIELD);
-    return true;
-  }
-
-  // VALUE?
-  private static boolean property_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property_2")) return false;
-    consumeToken(b, VALUE);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // !(COMMAND|COMMENT)
-  static boolean recover_property(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "recover_property")) return false;
+  // !(KEY|COMMENT)
+  static boolean recover_command(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "recover_command")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NOT_);
-    r = !recover_property_0(b, l + 1);
+    r = !recover_command_0(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
 
-  // COMMAND|COMMENT
-  private static boolean recover_property_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "recover_property_0")) return false;
+  // KEY|COMMENT
+  private static boolean recover_command_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "recover_command_0")) return false;
     boolean r;
-    r = consumeToken(b, COMMAND);
+    r = consumeToken(b, KEY);
     if (!r) r = consumeToken(b, COMMENT);
     return r;
   }
 
   /* ********************************************************** */
-  // item_*
-  static boolean simpleFile(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "simpleFile")) return false;
+  // command_*
+  static boolean redisPluginFile(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "redisPluginFile")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!item_(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "simpleFile", c)) break;
+      if (!command_(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "redisPluginFile", c)) break;
     }
     return true;
   }
 
-  static final Parser recover_property_parser_ = new Parser() {
+  static final Parser recover_command_parser_ = new Parser() {
     public boolean parse(PsiBuilder b, int l) {
-      return recover_property(b, l + 1);
+      return recover_command(b, l + 1);
     }
   };
 }

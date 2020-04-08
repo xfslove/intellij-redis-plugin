@@ -1,14 +1,17 @@
 package com.github.xfslove.intellij.plugin.redis;
 
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotificationPanel;
+import com.intellij.ui.HyperlinkAdapter;
 import com.intellij.ui.HyperlinkLabel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.event.HyperlinkEvent;
 import java.awt.*;
 
 /**
@@ -22,7 +25,23 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
 
   public CommandEditorPanel(@NotNull VirtualFile virtualFile) {
     this.virtualFile = virtualFile;
-    this.executeLabel = createActionLabel("Run command", () -> {});
+    this.executeLabel = createRunAllActionLabel();
+  }
+
+  @NotNull
+  private HyperlinkLabel createRunAllActionLabel() {
+    HyperlinkLabel label = new HyperlinkLabel("Run command", getBackground());
+    label.addHyperlinkListener(new HyperlinkAdapter() {
+
+      @Override
+      protected void hyperlinkActivated(HyperlinkEvent e) {
+        CommandEditorPanel.this.executeAction("execCommandAction");
+      }
+    });
+    label.setToolTipText("Run command");
+    label.setIcon(AllIcons.Actions.RunAll);
+    add("West", label);
+    return label;
   }
 
   @Nullable
@@ -30,7 +49,7 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   public Object getData(@NotNull String dataId) {
 
     if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-      return this.virtualFile;
+      return virtualFile;
     } else {
       return executeLabel;
     }

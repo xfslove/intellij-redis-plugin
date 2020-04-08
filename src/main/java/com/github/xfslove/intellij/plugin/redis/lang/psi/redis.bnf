@@ -17,23 +17,22 @@
   tokens = [
     COMMENT = "regexp://.*"
     CRLF = "regexp:\s+"
-    COMMAND = "regexp:(DEL|HGET|HSET|EXISTS|KEYS|SCAN)"
-    FIELD = "regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
-    VALUE = "regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\\'|\\)*\")"
+    KEY = "regexp:(DEL|HGET|HSET|EXISTS|KEYS|SCAN)"
+    FIELD = "regexp:\w+"
   ]
 
 }
 
-simpleFile ::= item_*
+redisPluginFile ::= command_*
 
-private item_ ::= property|COMMENT
+private command_ ::= command|COMMENT
 
-property ::= COMMAND FIELD? VALUE? {
+command ::= KEY FIELD FIELD? {
   pin=1
-  recoverWhile="recover_property"
+  recoverWhile="recover_command"
   mixin="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisNamedElementImpl"
   implements="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisNamedElement"
   methods=[getName setName getNameIdentifier getPresentation]
 }
 
-private recover_property ::= !(COMMAND|COMMENT)
+private recover_command ::= !(KEY|COMMENT)

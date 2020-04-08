@@ -20,13 +20,13 @@ public class RedisFileType extends LanguageFileType {
   @NotNull
   @Override
   public String getName() {
-    return "Redis File";
+    return "Redis Plugin";
   }
 
   @NotNull
   @Override
   public String getDescription() {
-    return "Redis File";
+    return "Redis Plugin";
   }
 
   @NotNull

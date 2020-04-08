@@ -13,8 +13,8 @@ import javax.swing.*;
 
 public class RedisPsiImplUtil {
 
-  public static String getCommand(RedisProperty element) {
-    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.COMMAND);
+  public static String getKey(RedisCommand element) {
+    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.KEY);
     if (keyNode != null) {
       // IMPORTANT: Convert embedded escaped spaces to simple spaces
       return keyNode.getText().replaceAll("\\\\ ", " ");
@@ -23,7 +23,7 @@ public class RedisPsiImplUtil {
     }
   }
 
-  public static String getField(RedisProperty element) {
+  public static String getField(RedisCommand element) {
     ASTNode valueNode = element.getNode().findChildByType(RedisTypes.FIELD);
     if (valueNode != null) {
       return valueNode.getText();
@@ -32,31 +32,22 @@ public class RedisPsiImplUtil {
     }
   }
 
-  public static String getValue(RedisProperty element) {
-    ASTNode valueNode = element.getNode().findChildByType(RedisTypes.VALUE);
-    if (valueNode != null) {
-      return valueNode.getText();
-    } else {
-      return null;
-    }
+  public static String getName(RedisCommand element) {
+    return getKey(element);
   }
 
-  public static String getName(RedisProperty element) {
-    return getCommand(element);
-  }
-
-  public static PsiElement setName(RedisProperty element, String newName) {
-    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.COMMAND);
+  public static PsiElement setName(RedisCommand element, String newName) {
+    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.KEY);
     if (keyNode != null) {
-      RedisProperty property = RedisElementFactory.createProperty(element.getProject(), newName);
+      RedisCommand property = RedisElementFactory.createProperty(element.getProject(), newName);
       ASTNode newKeyNode = property.getFirstChild().getNode();
       element.getNode().replaceChild(keyNode, newKeyNode);
     }
     return element;
   }
 
-  public static PsiElement getNameIdentifier(RedisProperty element) {
-    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.COMMAND);
+  public static PsiElement getNameIdentifier(RedisCommand element) {
+    ASTNode keyNode = element.getNode().findChildByType(RedisTypes.KEY);
     if (keyNode != null) {
       return keyNode.getPsi();
     } else {
@@ -64,7 +55,7 @@ public class RedisPsiImplUtil {
     }
   }
 
-  public static ItemPresentation getPresentation(final RedisProperty element) {
+  public static ItemPresentation getPresentation(final RedisCommand element) {
     return new ItemPresentation() {
       @Nullable
       @Override

@@ -21,6 +21,6 @@ public class RedisFile extends PsiFileBase {
   
   @Override
   public String toString() {
-    return "Redis File";
+    return "Redis Plugin";
   }
 }

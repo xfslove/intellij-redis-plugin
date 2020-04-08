@@ -7,7 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public class RedisVisitor extends PsiElementVisitor {
 
-  public void visitProperty(@NotNull RedisProperty o) {
+  public void visitCommand(@NotNull RedisCommand o) {
     visitNamedElement(o);
   }
 

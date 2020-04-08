@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.github.xfslove.intellij.plugin.redis.lang.psi.RedisTypes.*;
 import com.intellij.navigation.ItemPresentation;
 
-public class RedisPropertyImpl extends RedisNamedElementImpl implements RedisProperty {
+public class RedisCommandImpl extends RedisNamedElementImpl implements RedisCommand {
 
-  public RedisPropertyImpl(@NotNull ASTNode node) {
+  public RedisCommandImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull RedisVisitor visitor) {
-    visitor.visitProperty(this);
+    visitor.visitCommand(this);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
@@ -27,20 +27,8 @@ public class RedisPropertyImpl extends RedisNamedElementImpl implements RedisPro
 
   @Override
   @NotNull
-  public PsiElement getCommand() {
-    return findNotNullChildByType(COMMAND);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getField() {
-    return findChildByType(FIELD);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getValue() {
-    return findChildByType(VALUE);
+  public PsiElement getKey() {
+    return findNotNullChildByType(KEY);
   }
 
   @Override

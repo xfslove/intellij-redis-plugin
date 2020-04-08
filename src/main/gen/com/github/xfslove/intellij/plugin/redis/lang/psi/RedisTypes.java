@@ -7,18 +7,17 @@ import com.intellij.lang.ASTNode;
 
 public interface RedisTypes {
 
-  IElementType PROPERTY = new RedisElementType("PROPERTY");
+  IElementType COMMAND = new RedisElementType("COMMAND");
 
-  IElementType COMMAND = new RedisTokenType("COMMAND");
   IElementType COMMENT = new RedisTokenType("COMMENT");
   IElementType FIELD = new RedisTokenType("FIELD");
-  IElementType VALUE = new RedisTokenType("VALUE");
+  IElementType KEY = new RedisTokenType("KEY");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == PROPERTY) {
-        return new RedisPropertyImpl(node);
+      if (type == COMMAND) {
+        return new RedisCommandImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

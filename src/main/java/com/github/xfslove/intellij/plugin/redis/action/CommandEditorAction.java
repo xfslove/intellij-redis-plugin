@@ -53,7 +53,7 @@ public class CommandEditorAction extends DumbAwareAction {
     VirtualFile file;
     try {
       file = fileService.findFile(ScratchRootType.getInstance(), fileName, ScratchFileService.Option.create_new_always);
-    } catch (IOException var12) {
+    } catch (IOException e) {
       // todo show error
 //      showErrorBalloon(project, event, UIBundle.message("create.new.file.could.not.create.file.error.message", new Object[]{fileName}));
       return;
@@ -61,15 +61,15 @@ public class CommandEditorAction extends DumbAwareAction {
 
     FileEditor[] fileEditors = FileEditorManager.getInstance(project).openFile(file, true);
 
-    for (FileEditor curFileEditor : fileEditors) {
-      if (curFileEditor instanceof TextEditor) {
-        VirtualFile curFile = curFileEditor.getFile();
-        if (curFile != null && curFile.getPath().equals(file.getPath())) {
+//    for (FileEditor curFileEditor : fileEditors) {
+//      if (curFileEditor instanceof TextEditor) {
+//        VirtualFile curFile = curFileEditor.getFile();
+//        if (curFile != null && curFile.getPath().equals(file.getPath())) {
 //          TemplateManager.getInstance(project).startTemplate(((TextEditor) curFileEditor).getEditor(), template);
-          return;
-        }
-      }
-    }
+//          return;
+//        }
+//      }
+//    }
 
 //    Messages.showErrorDialog(project, RestClientBundle.message("http.request.add.request.action.error.adding.request.message", new Object[0]), RestClientBundle.message("http.request.add.request.action.error.adding.request", new Object[0]));
   }

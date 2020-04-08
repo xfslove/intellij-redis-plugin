@@ -8,9 +8,9 @@ import com.intellij.psi.PsiFileFactory;
 
 public class RedisElementFactory {
 
-  public static RedisProperty createProperty(Project project, String name) {
+  public static RedisCommand createProperty(Project project, String name) {
     final RedisFile file = createFile(project, name);
-    return (RedisProperty) file.getFirstChild();
+    return (RedisCommand) file.getFirstChild();
   }
 
   public static RedisFile createFile(Project project, String text) {
@@ -18,9 +18,9 @@ public class RedisElementFactory {
     return (RedisFile) PsiFileFactory.getInstance( project).createFileFromText(name, RedisFileType.INSTANCE, text);
   }
 
-  public static RedisProperty createProperty(Project project, String name, String value) {
+  public static RedisCommand createProperty(Project project, String name, String value) {
     final RedisFile file = createFile(project, name + " = " + value);
-    return (RedisProperty) file.getFirstChild();
+    return (RedisCommand) file.getFirstChild();
   }
 
   public static PsiElement createCRLF(Project project) {

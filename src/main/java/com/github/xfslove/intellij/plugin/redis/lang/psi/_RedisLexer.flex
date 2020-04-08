@@ -27,9 +27,8 @@ WHITE_SPACE=\s+
 
 COMMENT="//".*
 CRLF=[ \t\n\x0B\f\r]+
-COMMAND=(DEL|HGET|HSET|EXISTS|KEYS|SCAN)
-FIELD=('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\'|\\)*\")
-VALUE=('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\'|\\)*\")
+KEY=(DEL|HGET|HSET|EXISTS|KEYS|SCAN)
+FIELD=([a-zA-Z_0-9]+)
 
 %%
 <YYINITIAL> {
@@ -38,9 +37,8 @@ VALUE=('([^'\\]|\\.)*'|\"([^\"\\]|\\\"|\\'|\\)*\")
 
   {COMMENT}          { return COMMENT; }
   {CRLF}             { return CRLF; }
-  {COMMAND}          { return COMMAND; }
+  {KEY}              { return KEY; }
   {FIELD}            { return FIELD; }
-  {VALUE}            { return VALUE; }
 
 }
 
