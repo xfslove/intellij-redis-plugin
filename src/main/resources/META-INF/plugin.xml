@@ -23,6 +23,7 @@
         <editorNotificationProvider implementation="com.github.xfslove.intellij.plugin.redis.CommandEditorPanelProvider"/>
         <lang.parserDefinition language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisParserDefinition"/>
         <lang.syntaxHighlighterFactory language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisSyntaxHighlighterFactory"/>
+        <lang.commenter language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.psi.RedisCommenter"/>
     </extensions>
 
     <actions>

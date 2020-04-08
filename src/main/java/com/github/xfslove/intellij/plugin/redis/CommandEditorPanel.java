@@ -3,6 +3,7 @@ package com.github.xfslove.intellij.plugin.redis;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.DataKey;
 import com.intellij.openapi.actionSystem.DataProvider;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotificationPanel;
@@ -20,12 +21,19 @@ import java.awt.*;
  */
 public class CommandEditorPanel extends EditorNotificationPanel implements DataProvider {
 
+  public static final DataKey<HyperlinkLabel> EXEC_LABEL = DataKey.create("commandEditorPanel.executeLabel");
+  public static final DataKey<HyperlinkLabel> CONFIG_LABEL = DataKey.create("commandEditorPanel.configLabel");
+
   private final VirtualFile virtualFile;
   private final HyperlinkLabel executeLabel;
+  private final HyperlinkLabel configLabel;
 
   public CommandEditorPanel(@NotNull VirtualFile virtualFile) {
     this.virtualFile = virtualFile;
-    this.executeLabel = createRunAllActionLabel();
+    this.executeLabel = createActionLabel("Run command", "execCommandAction");
+    this.configLabel = createActionLabel("Configure format", () -> {
+      System.out.println("configure.......");
+    });
   }
 
   @NotNull
@@ -50,21 +58,12 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
 
     if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
       return virtualFile;
-    } else {
+    } else if (EXEC_LABEL.is(dataId)) {
       return executeLabel;
+    } else if (CONFIG_LABEL.is(dataId)) {
+      return configLabel;
     }
-
-    // todo label
-
-//      if (HttpClientDataKeys.EXAMPLES_TOOLBAR_HYPERLINK_LABEL.is(dataId)) {
-//      return this.myExamplesHyperlinkLabel;
-//    } else if (HttpClientDataKeys.ADD_REQUEST_TOOLBAR_HYPERLINK_LABEL.is(dataId)) {
-//      return this.myAddRequestHyperlinkLabel;
-//    } else if (HttpClientDataKeys.RUN_ALL_TOOLBAR_HYPERLINK_LABEL.is(dataId)) {
-//      return this.myRunAllRequestsHyperlinkLabel;
-//    } else {
-//      return HttpClientDataKeys.CREATE_ENV_FILE_HYPERLINK_LABEL.is(dataId) ? this.myCreateEnvFileHyperlinkLabel : null;
-//    }
+    return null;
   }
 
   @Override
