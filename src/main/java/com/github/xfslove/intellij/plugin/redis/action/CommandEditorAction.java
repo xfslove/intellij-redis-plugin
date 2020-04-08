@@ -1,7 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.github.xfslove.intellij.plugin.redis.lang.RedisFileType;
+import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.scratch.ScratchFileService;
 import com.intellij.ide.scratch.ScratchRootType;
@@ -58,7 +58,11 @@ public class CommandEditorAction extends DumbAwareAction {
       return;
     }
 
+
+    file.putUserData(ExplorerPanel.ROOT, explorerPanel);
+
     FileEditor[] fileEditors = FileEditorManager.getInstance(project).openFile(file, true);
+
 
 //    for (FileEditor curFileEditor : fileEditors) {
 //      if (curFileEditor instanceof TextEditor) {

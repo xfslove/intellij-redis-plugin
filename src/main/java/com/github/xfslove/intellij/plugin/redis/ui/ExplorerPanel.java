@@ -14,6 +14,7 @@ import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.tree.TreeUtil;
@@ -30,6 +31,8 @@ import java.util.List;
  * @date created at 2020/3/26
  */
 public class ExplorerPanel extends JPanel {
+
+  public static Key<ExplorerPanel> ROOT = Key.create("root.ExplorerPanel");
 
   private JPanel rootPanel;
   private JPanel toolbarPanel;

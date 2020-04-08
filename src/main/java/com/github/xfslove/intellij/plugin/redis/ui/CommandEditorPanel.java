@@ -25,12 +25,12 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   public static final DataKey<HyperlinkLabel> EXEC_LABEL = DataKey.create("commandEditorPanel.executeLabel");
   public static final DataKey<HyperlinkLabel> CONFIG_LABEL = DataKey.create("commandEditorPanel.configLabel");
 
-  private final VirtualFile virtualFile;
+  private final VirtualFile redisFile;
   private final HyperlinkLabel executeLabel;
   private final HyperlinkLabel configLabel;
 
-  public CommandEditorPanel(@NotNull VirtualFile virtualFile) {
-    this.virtualFile = virtualFile;
+  public CommandEditorPanel(@NotNull VirtualFile redisFile) {
+    this.redisFile = redisFile;
     this.executeLabel = createExecuteLabel();
     this.configLabel = createActionLabel("Configure Format", () -> {
       System.out.println("configure.......");
@@ -38,12 +38,14 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   }
 
   private HyperlinkLabel createExecuteLabel() {
+    ExplorerPanel rootPanel = redisFile.getUserData(ExplorerPanel.ROOT);
+
     HyperlinkLabel label = new HyperlinkLabel("Run Commands", getBackground());
     label.addHyperlinkListener(new HyperlinkAdapter() {
 
       @Override
       protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction(new ExecCommandsAction());
+        CommandEditorPanel.this.executeAction(new ExecCommandsAction(rootPanel));
       }
     });
     label.setToolTipText("Run Commands");
@@ -76,7 +78,7 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   public Object getData(@NotNull String dataId) {
 
     if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-      return virtualFile;
+      return redisFile;
     } else if (EXEC_LABEL.is(dataId)) {
       return executeLabel;
     } else if (CONFIG_LABEL.is(dataId)) {

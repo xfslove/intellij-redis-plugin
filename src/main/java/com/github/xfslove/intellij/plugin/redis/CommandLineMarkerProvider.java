@@ -2,10 +2,12 @@ package com.github.xfslove.intellij.plugin.redis;
 
 import com.github.xfslove.intellij.plugin.redis.lang.RedisCommand;
 import com.github.xfslove.intellij.plugin.redis.lang.RedisTypes;
+import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.execution.lineMarker.RunLineMarkerContributor;
 import com.intellij.icons.AllIcons;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +27,10 @@ public class CommandLineMarkerProvider extends RunLineMarkerContributor {
 //        Project project = element.getProject();
 //        PsiFile containingFile = element.getContainingFile();
 
-        return new Info(AllIcons.RunConfigurations.TestState.Run, new AnAction[] {new ExecCommandAction()}, (psiElement) -> "Run Command");
+        VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
+        ExplorerPanel rootPanel = virtualFile.getUserData(ExplorerPanel.ROOT);
+
+        return new Info(AllIcons.RunConfigurations.TestState.Run, new AnAction[] {new ExecCommandAction(rootPanel)}, (psiElement) -> "Run Command");
       }
     }
 

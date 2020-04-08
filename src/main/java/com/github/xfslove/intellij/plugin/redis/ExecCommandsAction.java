@@ -1,5 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis;
 
+import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.actions.ConfigurationContext;
 import com.intellij.execution.executors.DefaultRunExecutor;
@@ -13,12 +15,21 @@ import org.jetbrains.annotations.NotNull;
  */
 public class ExecCommandsAction extends DumbAwareAction {
 
-  public ExecCommandsAction() {
+  private final ExplorerPanel explorerPanel;
+
+  public ExecCommandsAction(ExplorerPanel explorerPanel) {
     super("Run Commands");
+    this.explorerPanel = explorerPanel;
   }
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+
+    if (explorerPanel == null) {
+      return;
+    }
+
+    Configuration selectedConfiguration = explorerPanel.getSelectedConfiguration();
 
     CommandRunExecutor executor = CommandRunExecutor.INSTANCE;
 
