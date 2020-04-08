@@ -1,14 +1,13 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.ExplorerPanel;
-import com.github.xfslove.intellij.plugin.redis.lang.psi.RedisFileType;
+import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
+import com.github.xfslove.intellij.plugin.redis.lang.RedisFileType;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.scratch.ScratchFileService;
 import com.intellij.ide.scratch.ScratchRootType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;

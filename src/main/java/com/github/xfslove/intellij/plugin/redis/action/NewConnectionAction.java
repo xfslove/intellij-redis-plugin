@@ -1,8 +1,8 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
 import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
-import com.github.xfslove.intellij.plugin.redis.ConfigurationDialog;
-import com.github.xfslove.intellij.plugin.redis.ExplorerPanel;
+import com.github.xfslove.intellij.plugin.redis.ui.ConfigurationDialog;
+import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;

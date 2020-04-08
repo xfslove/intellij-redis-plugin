@@ -1,0 +1,38 @@
+{
+  parserClass="com.github.xfslove.intellij.plugin.redis.lang.RedisParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Redis"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.xfslove.intellij.plugin.redis.lang"
+  psiImplPackage="com.github.xfslove.intellij.plugin.redis.lang"
+
+  elementTypeHolderClass="com.github.xfslove.intellij.plugin.redis.lang.RedisTypes"
+  elementTypeClass="com.github.xfslove.intellij.plugin.redis.lang.RedisElementType"
+  tokenTypeClass="com.github.xfslove.intellij.plugin.redis.lang.RedisTokenType"
+
+  psiImplUtilClass="com.github.xfslove.intellij.plugin.redis.lang.RedisPsiImplUtil"
+
+  tokens = [
+    COMMENT = "regexp://.*"
+    CRLF = "regexp:\s+"
+    KEY = "regexp:(DEL|HGET|HSET|EXISTS|KEYS|SCAN)"
+    FIELD = "regexp:\w+"
+  ]
+
+}
+
+redisPluginFile ::= command_*
+
+private command_ ::= command|COMMENT
+
+command ::= KEY FIELD FIELD? {
+  pin=1
+  recoverWhile="recover_command"
+  mixin="com.github.xfslove.intellij.plugin.redis.lang.RedisNamedElementImpl"
+  implements="com.github.xfslove.intellij.plugin.redis.lang.RedisNamedElement"
+  methods=[getName setName getNameIdentifier getPresentation]
+}
+
+private recover_command ::= !(KEY|COMMENT)
