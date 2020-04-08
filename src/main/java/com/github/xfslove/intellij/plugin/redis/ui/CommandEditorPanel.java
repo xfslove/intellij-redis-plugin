@@ -1,10 +1,11 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
+import com.github.xfslove.intellij.plugin.redis.ExecCommandsAction;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.actionSystem.DataKey;
-import com.intellij.openapi.actionSystem.DataProvider;
+import com.intellij.ide.DataManager;
+import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotificationPanel;
 import com.intellij.ui.HyperlinkAdapter;
@@ -31,25 +32,43 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   public CommandEditorPanel(@NotNull VirtualFile virtualFile) {
     this.virtualFile = virtualFile;
     this.executeLabel = createExecuteLabel();
-//    createActionLabel("Run command", "execCommandAction");
-    this.configLabel = createActionLabel("Configure format", () -> {
+    this.configLabel = createActionLabel("Configure Format", () -> {
       System.out.println("configure.......");
     });
   }
 
   private HyperlinkLabel createExecuteLabel() {
-    HyperlinkLabel label = new HyperlinkLabel("Run command", getBackground());
+    HyperlinkLabel label = new HyperlinkLabel("Run Commands", getBackground());
     label.addHyperlinkListener(new HyperlinkAdapter() {
 
       @Override
       protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction("execCommandAction");
+        CommandEditorPanel.this.executeAction(new ExecCommandsAction());
       }
     });
-    label.setToolTipText("Run command");
+    label.setToolTipText("Run Commands");
     label.setIcon(AllIcons.Actions.RunAll);
     add("West", label);
     return label;
+  }
+
+  /**
+   *   implement super.executeAction(actionId).
+   *   do this to enable create action instead of registry action.
+   *   for pass arguments to action.
+   */
+  protected void executeAction(final AnAction action) {
+    final AnActionEvent event = AnActionEvent.createFromAnAction(action, null, getActionPlace(),
+        DataManager.getInstance().getDataContext(this));
+    action.beforeActionPerformedUpdate(event);
+    action.update(event);
+
+    if (event.getPresentation().isEnabled() && event.getPresentation().isVisible()) {
+      ActionManagerEx actionManager = ActionManagerEx.getInstanceEx();
+      actionManager.fireBeforeActionPerformed(action, event.getDataContext(), event);
+      action.actionPerformed(event);
+      actionManager.fireAfterActionPerformed(action, event.getDataContext(), event);
+    }
   }
 
   @Nullable

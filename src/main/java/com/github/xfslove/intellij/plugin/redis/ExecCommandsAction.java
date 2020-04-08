@@ -7,10 +7,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.DumbAwareAction;
 import org.jetbrains.annotations.NotNull;
 
-public class ExecCommandAction extends DumbAwareAction {
+/**
+ * @author wongiven
+ * @date created at 2020/4/8
+ */
+public class ExecCommandsAction extends DumbAwareAction {
 
-  public ExecCommandAction() {
-    super("Run Command");
+  public ExecCommandsAction() {
+    super("Run Commands");
   }
 
   @Override
@@ -25,8 +29,5 @@ public class ExecCommandAction extends DumbAwareAction {
 
     executor.execute(anActionEvent.getProject(), context.getConfiguration(), DefaultRunExecutor.getRunExecutorInstance());
 
-
-
   }
-
 }

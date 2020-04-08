@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.github.xfslove.redis-command</id>
+    <id>com.github.xfslove.redis-plugin</id>
     <name>Redis Client</name>
     <vendor email="xfslove@gmail.com" url="https://www.github.com/xfslove">hanwen.huang</vendor>
 
@@ -20,16 +20,15 @@
         <toolWindow id="redisExplorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanelFactory"/>
 
         <fileType name="Redis Plugin" language="REDIS" extensions="redis" fieldName="INSTANCE" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.RedisFileType"/>
-        <editorNotificationProvider implementation="com.github.xfslove.intellij.plugin.redis.ui.CommandEditorPanelProvider"/>
         <lang.parserDefinition language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.RedisParserDefinition"/>
         <lang.syntaxHighlighterFactory language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.RedisSyntaxHighlighterFactory"/>
         <lang.commenter language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.RedisCommenter"/>
+
+        <editorNotificationProvider implementation="com.github.xfslove.intellij.plugin.redis.ui.CommandEditorPanelProvider"/>
+        <runLineMarkerContributor language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.CommandLineMarkerProvider"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-
-        <action class="com.github.xfslove.intellij.plugin.redis.ExecCommandAction" id="execCommandAction"/>
-
     </actions>
 </idea-plugin>
