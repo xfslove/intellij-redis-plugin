@@ -1,10 +1,10 @@
 <idea-plugin>
-    <id>com.github.xfslove.redis-plugin</id>
-    <name>Redis Client</name>
+    <id>com.github.xfslove.intellij-redis-plugin</id>
+    <name>Intellij Redis</name>
     <vendor email="xfslove@gmail.com" url="https://www.github.com/xfslove">hanwen.huang</vendor>
 
     <description><![CDATA[
-    Redis client integration for Intellij idea
+    Intellij redis plugin: integrated redis command
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
