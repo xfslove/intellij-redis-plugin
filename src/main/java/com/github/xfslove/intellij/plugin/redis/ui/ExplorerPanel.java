@@ -5,7 +5,7 @@ import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
-import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
+import com.github.xfslove.intellij.plugin.redis.storage.ConfigurationStorage;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.ide.TreeExpander;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class ExplorerPanel extends JPanel {
 
-  public static Key<ExplorerPanel> ROOT = Key.create("root.ExplorerPanel");
+  public static Key<Configuration> SELECTED_CONFIG = Key.create("explorerPanel.selectedConfiguration");
 
   private JPanel rootPanel;
   private JPanel toolbarPanel;
@@ -77,7 +77,7 @@ public class ExplorerPanel extends JPanel {
   }
 
   private void initConfigurations() {
-    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
     List<Configuration> configurations = storage.getServerConfigurations();
     if (configurations.isEmpty()) {
       return;
@@ -101,7 +101,7 @@ public class ExplorerPanel extends JPanel {
   public void newConfiguration(Configuration configuration) {
     //save
     configuration.storePasswordToOs();
-    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
     storage.getServerConfigurations().add(configuration);
 
     // render
@@ -132,7 +132,7 @@ public class ExplorerPanel extends JPanel {
     // delete
     Configuration selectedConfiguration = (Configuration) selectedServerNode.getUserObject();
     selectedConfiguration.removePasswordFromOs();
-    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
     storage.getServerConfigurations().remove(selectedConfiguration);
 
     // render
@@ -148,7 +148,7 @@ public class ExplorerPanel extends JPanel {
       return;
     }
 
-    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
     Configuration target = (Configuration) selectedServerNode.getUserObject();
 
     if (source.equals(target)) {
@@ -202,7 +202,7 @@ public class ExplorerPanel extends JPanel {
       @Override
       protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+        ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
         if (storage.getServerConfigurations().isEmpty()) {
           treeEmptyNoticeOn(g);
         }

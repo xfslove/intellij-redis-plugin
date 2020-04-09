@@ -1,6 +1,8 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.ExecCommandsAction;
+import com.github.xfslove.intellij.plugin.redis.action.ConfigureServerAction;
+import com.github.xfslove.intellij.plugin.redis.action.ExecCommandsAction;
+import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
@@ -26,32 +28,59 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   public static final DataKey<HyperlinkLabel> CONFIG_LABEL = DataKey.create("commandEditorPanel.configLabel");
 
   private final VirtualFile redisFile;
-  private final HyperlinkLabel executeLabel;
-  private final HyperlinkLabel configLabel;
+  private HyperlinkLabel executeLabel;
+  private HyperlinkLabel configureLabel;
 
   public CommandEditorPanel(@NotNull VirtualFile redisFile) {
     this.redisFile = redisFile;
-    this.executeLabel = createExecuteLabel();
-    this.configLabel = createActionLabel("Configure Format", () -> {
-      System.out.println("configure.......");
-    });
+    createExecuteLabels();
+    createConfigureLabels();
   }
 
-  private HyperlinkLabel createExecuteLabel() {
-    ExplorerPanel rootPanel = redisFile.getUserData(ExplorerPanel.ROOT);
+  private void createConfigureLabels() {
+    Configuration selectedConfiguration = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
+
+    if (selectedConfiguration != null) {
+      return;
+    }
+
+    text("You should configure one redis server.").icon(AllIcons.General.NotificationError);
+
+    HyperlinkLabel label = new HyperlinkLabel("Configure Server", getBackground());
+    label.addHyperlinkListener(new HyperlinkAdapter() {
+
+      @Override
+      protected void hyperlinkActivated(HyperlinkEvent e) {
+        CommandEditorPanel.this.executeAction(new ConfigureServerAction());
+      }
+    });
+    label.setToolTipText("Configure Server");
+    label.setIcon(AllIcons.General.Settings);
+    myLinksPanel.add(label);
+
+    configureLabel = label;
+  }
+
+  private void createExecuteLabels() {
+    Configuration selectedConfiguration = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
+
+    if (selectedConfiguration == null) {
+      return;
+    }
 
     HyperlinkLabel label = new HyperlinkLabel("Run Commands", getBackground());
     label.addHyperlinkListener(new HyperlinkAdapter() {
 
       @Override
       protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction(new ExecCommandsAction(rootPanel));
+        CommandEditorPanel.this.executeAction(new ExecCommandsAction());
       }
     });
     label.setToolTipText("Run Commands");
     label.setIcon(AllIcons.Actions.RunAll);
     add("West", label);
-    return label;
+
+    executeLabel = label;
   }
 
   /**
@@ -82,7 +111,7 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
     } else if (EXEC_LABEL.is(dataId)) {
       return executeLabel;
     } else if (CONFIG_LABEL.is(dataId)) {
-      return configLabel;
+      return configureLabel;
     }
     return null;
   }

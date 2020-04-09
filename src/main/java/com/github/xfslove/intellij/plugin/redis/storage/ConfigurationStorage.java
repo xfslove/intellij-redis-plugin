@@ -14,21 +14,21 @@ import java.util.List;
  * @date created at 2020/3/26
  */
 @State(
-    name = "ConnectionStorage",
+    name = "Connections",
     storages = {@Storage("redis-connections.xml")}
 )
-public class ConnectionStorage implements PersistentStateComponent<ConnectionStorage> {
+public class ConfigurationStorage implements PersistentStateComponent<ConfigurationStorage> {
 
   private List<Configuration> configurations = new ArrayList<>();
 
   @Override
-  public ConnectionStorage getState() {
+  public ConfigurationStorage getState() {
     return this;
   }
 
   @Override
-  public void loadState(@NotNull ConnectionStorage connectionStorage) {
-    XmlSerializerUtil.copyBean(connectionStorage, this);
+  public void loadState(@NotNull ConfigurationStorage configurationStorage) {
+    XmlSerializerUtil.copyBean(configurationStorage, this);
   }
 
   public void setServerConfigurations(List<Configuration> configurations) {

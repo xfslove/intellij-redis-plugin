@@ -15,7 +15,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.client.RedisClient"/>
-        <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage"/>
+        <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.storage.ConfigurationStorage"/>
 
         <toolWindow id="redisExplorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanelFactory"/>
 
@@ -25,7 +25,7 @@
         <lang.commenter language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.lang.RedisCommenter"/>
 
         <editorNotificationProvider implementation="com.github.xfslove.intellij.plugin.redis.ui.CommandEditorPanelProvider"/>
-        <runLineMarkerContributor language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.CommandLineMarkerProvider"/>
+        <runLineMarkerContributor language="REDIS" implementationClass="com.github.xfslove.intellij.plugin.redis.ui.CommandLineMarkerProvider"/>
     </extensions>
 
     <actions>

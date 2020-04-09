@@ -23,8 +23,8 @@ public class EditConnectionAction extends DumbAwareAction {
   }
 
   @Override
-  public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-    Project project = anActionEvent.getProject();
+  public void actionPerformed(@NotNull AnActionEvent e) {
+    Project project = e.getProject();
 
     Configuration configuration = explorerPanel.getSelectedConfiguration();
 

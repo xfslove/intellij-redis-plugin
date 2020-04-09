@@ -30,10 +30,10 @@ public class CommandEditorAction extends DumbAwareAction {
   }
 
   @Override
-  public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
-    Project project = anActionEvent.getProject();
+  public void actionPerformed(@NotNull AnActionEvent e) {
+    Project project = e.getProject();
 
-    createScratchFile(project, anActionEvent);
+    createScratchFile(project, e);
 
   }
 
@@ -44,25 +44,23 @@ public class CommandEditorAction extends DumbAwareAction {
 
   }
 
-  private void createScratchFile(@NotNull Project project, @NotNull AnActionEvent event) {
+  private void createScratchFile(Project project, AnActionEvent e) {
 
     String fileName = PathUtil.makeFileName("redis-command", RedisFileType.INSTANCE.getDefaultExtension());
     ScratchFileService fileService = ScratchFileService.getInstance();
 
     VirtualFile file;
     try {
-      file = fileService.findFile(ScratchRootType.getInstance(), fileName, ScratchFileService.Option.create_new_always);
-    } catch (IOException e) {
+      // todo new or open
+      file = fileService.findFile(ScratchRootType.getInstance(), fileName, ScratchFileService.Option.create_if_missing);
+    } catch (IOException ex) {
       // todo show error
-//      showErrorBalloon(project, event, UIBundle.message("create.new.file.could.not.create.file.error.message", new Object[]{fileName}));
       return;
     }
 
 
-    file.putUserData(ExplorerPanel.ROOT, explorerPanel);
-
-    FileEditor[] fileEditors = FileEditorManager.getInstance(project).openFile(file, true);
-
+    file.putUserData(ExplorerPanel.SELECTED_CONFIG, explorerPanel.getSelectedConfiguration());
+    FileEditorManager.getInstance(project).openFile(file, true);
 
 //    for (FileEditor curFileEditor : fileEditors) {
 //      if (curFileEditor instanceof TextEditor) {

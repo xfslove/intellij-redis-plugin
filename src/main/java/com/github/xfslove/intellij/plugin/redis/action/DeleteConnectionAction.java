@@ -20,7 +20,7 @@ public class DeleteConnectionAction extends DumbAwareAction {
   }
 
   @Override
-  public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+  public void actionPerformed(@NotNull AnActionEvent e) {
     explorerPanel.deleteSelectedConfiguration();
   }
 

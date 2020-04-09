@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class CommandEditorPanelProvider extends EditorNotifications.Provider<CommandEditorPanel> {
 
-  public static final Key<CommandEditorPanel> PANEL_KEY = Key.create("CommandEditorPanel");
+  public static final Key<CommandEditorPanel> PANEL_KEY = Key.create("commandEditorPanel");
 
   @NotNull
   @Override
