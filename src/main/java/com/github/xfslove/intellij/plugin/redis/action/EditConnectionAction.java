@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EditConnectionAction extends DumbAwareAction {
 
-  private ExplorerPanel explorerPanel;
+  private final ExplorerPanel explorerPanel;
 
   public EditConnectionAction(ExplorerPanel explorerPanel) {
     super("Edit Connection", "Edit connection", AllIcons.General.Settings);

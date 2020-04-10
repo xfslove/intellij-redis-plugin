@@ -6,7 +6,8 @@ import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.ex.ActionManagerEx;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotificationPanel;
@@ -22,10 +23,7 @@ import java.awt.*;
  * @author wongiven
  * @date created at 2020/4/7
  */
-public class CommandEditorPanel extends EditorNotificationPanel implements DataProvider {
-
-  public static final DataKey<HyperlinkLabel> EXEC_LABEL = DataKey.create("commandEditorPanel.executeLabel");
-  public static final DataKey<HyperlinkLabel> CONFIG_LABEL = DataKey.create("commandEditorPanel.configLabel");
+public class CommandEditorPanel extends EditorNotificationPanel {
 
   private final VirtualFile redisFile;
   private HyperlinkLabel executeLabel;
@@ -102,20 +100,6 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
     }
   }
 
-  @Nullable
-  @Override
-  public Object getData(@NotNull String dataId) {
-
-    if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-      return redisFile;
-    } else if (EXEC_LABEL.is(dataId)) {
-      return executeLabel;
-    } else if (CONFIG_LABEL.is(dataId)) {
-      return configureLabel;
-    }
-    return null;
-  }
-
   @Override
   public Color getBackground() {
     return EditorNotificationPanel.getToolbarBackground();
@@ -125,5 +109,13 @@ public class CommandEditorPanel extends EditorNotificationPanel implements DataP
   @Override
   public IntentionActionWithOptions getIntentionAction() {
     return null;
+  }
+
+  public HyperlinkLabel getExecuteLabel() {
+    return executeLabel;
+  }
+
+  public HyperlinkLabel getConfigureLabel() {
+    return configureLabel;
   }
 }

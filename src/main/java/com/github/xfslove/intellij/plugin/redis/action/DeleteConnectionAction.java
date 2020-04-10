@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class DeleteConnectionAction extends DumbAwareAction {
 
-  private ExplorerPanel explorerPanel;
+  private final ExplorerPanel explorerPanel;
 
   public DeleteConnectionAction(ExplorerPanel explorerPanel) {
     super("Delete Connection", "Delete connection", AllIcons.General.Remove);
