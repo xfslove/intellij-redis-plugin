@@ -3,7 +3,7 @@ package com.github.xfslove.intellij.plugin.redis.ui;
 import com.github.xfslove.intellij.plugin.redis.action.ExecCommandAction;
 import com.github.xfslove.intellij.plugin.redis.lang.RedisCommand;
 import com.github.xfslove.intellij.plugin.redis.lang.RedisTypes;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.execution.lineMarker.RunLineMarkerContributor;
 import com.intellij.icons.AllIcons;
 import com.intellij.lang.ASTNode;
@@ -29,9 +29,9 @@ public class CommandLineMarkerProvider extends RunLineMarkerContributor {
 //        PsiFile containingFile = element.getContainingFile();
 
         VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
-        Configuration selectedConfiguration = virtualFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
+        Connection selectedConnection = virtualFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
 
-        if (selectedConfiguration == null) {
+        if (selectedConnection == null) {
           return null;
         }
         return new Info(AllIcons.RunConfigurations.TestState.Run,

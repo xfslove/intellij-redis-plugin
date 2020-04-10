@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.github.xfslove.intellij.plugin.redis.ui.ConfigurationDialog;
 import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.icons.AllIcons;
@@ -26,12 +26,12 @@ public class EditConnectionAction extends DumbAwareAction {
   public void actionPerformed(@NotNull AnActionEvent e) {
     Project project = e.getProject();
 
-    Configuration configuration = explorerPanel.getSelectedConfiguration();
+    Connection connection = explorerPanel.getSelectedConfiguration();
 
-    Configuration clone = new Configuration();
-    clone.setName(configuration.getName());
-    clone.setUrl(configuration.getUrl());
-    clone.setSavePassword(configuration.isSavePassword());
+    Connection clone = new Connection();
+    clone.setName(connection.getName());
+    clone.setUrl(connection.getUrl());
+    clone.setSavePassword(connection.isSavePassword());
 
     ConfigurationDialog dialog = new ConfigurationDialog(explorerPanel, project, clone);
     dialog.show();

@@ -4,8 +4,8 @@ import com.github.xfslove.intellij.plugin.redis.action.CommandEditorAction;
 import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
-import com.github.xfslove.intellij.plugin.redis.storage.ConfigurationStorage;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.ide.TreeExpander;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class ExplorerPanel extends JPanel {
 
-  public static Key<Configuration> SELECTED_CONFIG = Key.create("explorerPanel.selectedConfiguration");
+  public static Key<Connection> SELECTED_CONFIG = Key.create("explorerPanel.selectedConfiguration");
 
   private JPanel rootPanel;
   private JPanel toolbarPanel;
@@ -77,17 +77,17 @@ public class ExplorerPanel extends JPanel {
   }
 
   private void initConfigurations() {
-    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-    List<Configuration> configurations = storage.getServerConfigurations();
-    if (configurations.isEmpty()) {
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    List<Connection> connections = storage.getConnections();
+    if (connections.isEmpty()) {
       return;
     }
 
     // render
     DefaultTreeModel model = (DefaultTreeModel) redisServersTree.getModel();
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model.getRoot();
-    for (Configuration configuration : configurations) {
-      DefaultMutableTreeNode serverNode = new DefaultMutableTreeNode(configuration);
+    for (Connection connection : connections) {
+      DefaultMutableTreeNode serverNode = new DefaultMutableTreeNode(connection);
       rootNode.add(serverNode);
     }
 
@@ -98,28 +98,28 @@ public class ExplorerPanel extends JPanel {
     return this.rootPanel;
   }
 
-  public void newConfiguration(Configuration configuration) {
+  public void newConfiguration(Connection connection) {
     //save
-    configuration.storePasswordToOs();
-    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-    storage.getServerConfigurations().add(configuration);
+    connection.storePasswordToOs();
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    storage.getConnections().add(connection);
 
     // render
     DefaultTreeModel model = (DefaultTreeModel) redisServersTree.getModel();
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) model.getRoot();
-    DefaultMutableTreeNode serverNode = new DefaultMutableTreeNode(configuration);
+    DefaultMutableTreeNode serverNode = new DefaultMutableTreeNode(connection);
     rootNode.add(serverNode);
     model.reload();
   }
 
-  public Configuration getSelectedConfiguration() {
+  public Connection getSelectedConfiguration() {
     DefaultMutableTreeNode selectedServerNode = (DefaultMutableTreeNode) redisServersTree.getLastSelectedPathComponent();
 
     if (selectedServerNode == null) {
       return null;
     }
 
-    return  (Configuration) selectedServerNode.getUserObject();
+    return  (Connection) selectedServerNode.getUserObject();
   }
 
   public void deleteSelectedConfiguration() {
@@ -130,10 +130,10 @@ public class ExplorerPanel extends JPanel {
     }
 
     // delete
-    Configuration selectedConfiguration = (Configuration) selectedServerNode.getUserObject();
-    selectedConfiguration.removePasswordFromOs();
-    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-    storage.getServerConfigurations().remove(selectedConfiguration);
+    Connection selectedConnection = (Connection) selectedServerNode.getUserObject();
+    selectedConnection.removePasswordFromOs();
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    storage.getConnections().remove(selectedConnection);
 
     // render
     DefaultTreeModel model = (DefaultTreeModel) redisServersTree.getModel();
@@ -141,15 +141,15 @@ public class ExplorerPanel extends JPanel {
     model.reload();
   }
 
-  public void reloadConfiguration(Configuration source) {
+  public void reloadConfiguration(Connection source) {
     DefaultMutableTreeNode selectedServerNode = (DefaultMutableTreeNode) redisServersTree.getLastSelectedPathComponent();
 
     if (selectedServerNode == null) {
       return;
     }
 
-    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-    Configuration target = (Configuration) selectedServerNode.getUserObject();
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    Connection target = (Connection) selectedServerNode.getUserObject();
 
     if (source.equals(target)) {
       return;
@@ -161,8 +161,8 @@ public class ExplorerPanel extends JPanel {
     // update (source -> target)
     target.removePasswordFromOs();
     source.storePasswordToOs();
-    int targetIndex = storage.getServerConfigurations().indexOf(target);
-    storage.getServerConfigurations().set(targetIndex, source);
+    int targetIndex = storage.getConnections().indexOf(target);
+    storage.getConnections().set(targetIndex, source);
 
     // render
     selectedServerNode.setUserObject(source);
@@ -202,8 +202,8 @@ public class ExplorerPanel extends JPanel {
       @Override
       protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-        if (storage.getServerConfigurations().isEmpty()) {
+        ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+        if (storage.getConnections().isEmpty()) {
           treeEmptyNoticeOn(g);
         }
       }
@@ -219,7 +219,7 @@ public class ExplorerPanel extends JPanel {
   }
 
   private void treeEmptyNoticeOn(Graphics g) {
-    JLabel myLabel = new JLabel("<html><center>Redis server list is empty</center></html>");
+    JLabel myLabel = new JLabel("<html><center>Redis connection list is empty</center></html>");
     myLabel.setFont(getFont());
     myLabel.setBackground(getBackground());
     myLabel.setForeground(getForeground());

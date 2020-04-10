@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.github.xfslove.intellij.plugin.redis.ui.ConfigurationDialog;
 import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.icons.AllIcons;
@@ -26,12 +26,12 @@ public class NewConnectionAction extends DumbAwareAction {
   public void actionPerformed(@NotNull AnActionEvent e) {
     Project project = e.getProject();
 
-    Configuration configuration = new Configuration();
-    ConfigurationDialog dialog = new ConfigurationDialog(explorerPanel, project, configuration);
+    Connection connection = new Connection();
+    ConfigurationDialog dialog = new ConfigurationDialog(explorerPanel, project, connection);
     dialog.show();
 
     if (dialog.isOK()) {
-      explorerPanel.newConfiguration(configuration);
+      explorerPanel.newConfiguration(connection);
     }
   }
 

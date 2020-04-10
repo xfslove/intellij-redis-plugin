@@ -12,7 +12,7 @@ import java.util.Objects;
  * @author wongiven
  * @date created at 2020/3/26
  */
-public class Configuration implements Cloneable {
+public class Connection implements Cloneable {
 
   private String name;
   private String url;
@@ -97,7 +97,7 @@ public class Configuration implements Cloneable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Configuration that = (Configuration) o;
+    Connection that = (Connection) o;
     return savePassword == that.savePassword &&
         name.equals(that.name) &&
         url.equals(that.url);

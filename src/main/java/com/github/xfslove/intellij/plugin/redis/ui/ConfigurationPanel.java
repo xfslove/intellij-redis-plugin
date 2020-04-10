@@ -1,7 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
 import com.github.xfslove.intellij.plugin.redis.client.RedisClient;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -9,14 +9,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.ValidationInfo;
 import com.intellij.openapi.util.Ref;
-import com.intellij.ui.JBColor;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 /**
  * @author wongiven
@@ -46,17 +42,17 @@ public class ConfigurationPanel extends JPanel {
       final Ref<Exception> excRef = new Ref<>();
       final ProgressManager progressManager = ProgressManager.getInstance();
       progressManager.runProcessWithProgressSynchronously(() -> {
-        Configuration configuration = new Configuration();
-        apply(configuration);
-        configuration.oneTimePassword(getPasswordField());
+        Connection connection = new Connection();
+        apply(connection);
+        connection.oneTimePassword(getPasswordField());
 
         final ProgressIndicator progressIndicator = progressManager.getProgressIndicator();
         if (progressIndicator != null) {
-          progressIndicator.setText("Connecting to " + configuration.getUrl());
+          progressIndicator.setText("Connecting to " + connection.getUrl());
         }
         try {
           RedisClient redisClient = ServiceManager.getService(project, RedisClient.class);
-          redisClient.connect(configuration);
+          redisClient.connect(connection);
         } catch (Exception ex) {
           excRef.set(ex);
         }
@@ -124,15 +120,15 @@ public class ConfigurationPanel extends JPanel {
     return null;
   }
 
-  public void apply(Configuration configuration) {
-    configuration.setName(getNameField());
-    configuration.setUrl(getUrlField());
-    configuration.setSavePassword(isSavePasswordCheckBoxSelected());
+  public void apply(Connection connection) {
+    connection.setName(getNameField());
+    connection.setUrl(getUrlField());
+    connection.setSavePassword(isSavePasswordCheckBoxSelected());
   }
 
-  public void load(Configuration configuration) {
-    setNameField(configuration.getName());
-    setUrlField(configuration.getUrl());
-    setSavePasswordCheckBoxSelect(configuration.isSavePassword());
+  public void load(Connection connection) {
+    setNameField(connection.getName());
+    setUrlField(connection.getUrl());
+    setSavePasswordCheckBoxSelect(connection.isSavePassword());
   }
 }

@@ -1,7 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
 import com.github.xfslove.intellij.plugin.redis.CommandRunExecutor;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.execution.RunManager;
 import com.intellij.execution.actions.ConfigurationContext;
@@ -20,7 +20,7 @@ public class ExecCommandAction extends DumbAwareAction {
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
 
-    Configuration configuration = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE).getUserData(ExplorerPanel.SELECTED_CONFIG);
+    Connection connection = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE).getUserData(ExplorerPanel.SELECTED_CONFIG);
 
     CommandRunExecutor executor = CommandRunExecutor.INSTANCE;
 

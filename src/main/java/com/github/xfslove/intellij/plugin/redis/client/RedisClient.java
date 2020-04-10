@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.client;
 
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
  */
 public class RedisClient {
 
-  public void connect(Configuration configuration) {
-    RedisClusterAsyncCommands<byte[], byte[]> commands = getCommands(configuration);
+  public void connect(Connection connection) {
+    RedisClusterAsyncCommands<byte[], byte[]> commands = getCommands(connection);
   }
 
-  private RedisClusterAsyncCommands<byte[], byte[]> getCommands(Configuration configuration) {
-    if (configuration.isCluster()) {
+  private RedisClusterAsyncCommands<byte[], byte[]> getCommands(Connection connection) {
+    if (connection.isCluster()) {
 
-      String[] urls = configuration.getUrl().split(",");
-      String password = configuration.retrievePassword();
+      String[] urls = connection.getUrl().split(",");
+      String password = connection.retrievePassword();
 
       List<RedisURI> uriList = Arrays.stream(urls).map(url -> {
         String[] hp = url.split(":");
@@ -38,8 +38,8 @@ public class RedisClient {
 
       return RedisClusterClient.create(uriList).connect(new ByteArrayCodec()).async();
     } else {
-      String[] hp = configuration.getUrl().split(":");
-      String password = configuration.retrievePassword();
+      String[] hp = connection.getUrl().split(":");
+      String password = connection.retrievePassword();
 
       RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
       if (StringUtils.isNotBlank(password)) {

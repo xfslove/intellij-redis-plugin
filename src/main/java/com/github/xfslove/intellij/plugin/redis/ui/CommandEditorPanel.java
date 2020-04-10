@@ -1,8 +1,8 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.action.ConfigureServerAction;
+import com.github.xfslove.intellij.plugin.redis.action.SelectConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.ExecCommandsAction;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.DataManager;
@@ -36,23 +36,23 @@ public class CommandEditorPanel extends EditorNotificationPanel {
   }
 
   private void createConfigureLabels() {
-    Configuration selectedConfiguration = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
+    Connection selectedConnection = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
 
-    if (selectedConfiguration != null) {
+    if (selectedConnection != null) {
       return;
     }
 
-    text("You should configure one redis server.").icon(AllIcons.General.NotificationError);
+    text("You should select one redis connection.").icon(AllIcons.General.NotificationError);
 
-    HyperlinkLabel label = new HyperlinkLabel("Configure Server", getBackground());
+    HyperlinkLabel label = new HyperlinkLabel("Select Connection", getBackground());
     label.addHyperlinkListener(new HyperlinkAdapter() {
 
       @Override
       protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction(new ConfigureServerAction());
+        CommandEditorPanel.this.executeAction(new SelectConnectionAction());
       }
     });
-    label.setToolTipText("Configure Server");
+    label.setToolTipText("Select Connection");
     label.setIcon(AllIcons.General.Settings);
     myLinksPanel.add(label);
 
@@ -60,9 +60,9 @@ public class CommandEditorPanel extends EditorNotificationPanel {
   }
 
   private void createExecuteLabels() {
-    Configuration selectedConfiguration = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
+    Connection selectedConnection = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
 
-    if (selectedConfiguration == null) {
+    if (selectedConnection == null) {
       return;
     }
 
@@ -76,7 +76,7 @@ public class CommandEditorPanel extends EditorNotificationPanel {
     });
     label.setToolTipText("Run Commands");
     label.setIcon(AllIcons.Actions.RunAll);
-    add("West", label);
+    add(label);
 
     executeLabel = label;
   }

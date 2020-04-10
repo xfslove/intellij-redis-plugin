@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.ValidationInfo;
@@ -15,15 +15,15 @@ import java.awt.*;
  */
 public class ConfigurationDialog extends DialogWrapper {
 
-  private final Configuration configuration;
+  private final Connection connection;
   private final Project project;
   private ConfigurationPanel configurationPanel;
 
   public ConfigurationDialog(Component parent,
                              Project project,
-                             Configuration configuration) {
+                             Connection connection) {
     super(parent, true);
-    this.configuration = configuration;
+    this.connection = connection;
     this.project = project;
     init();
     setTitle("New Redis Connection");
@@ -33,7 +33,7 @@ public class ConfigurationDialog extends DialogWrapper {
   @Override
   protected JComponent createCenterPanel() {
     configurationPanel = new ConfigurationPanel(project);
-    configurationPanel.load(configuration);
+    configurationPanel.load(connection);
     return configurationPanel;
   }
 
@@ -45,6 +45,6 @@ public class ConfigurationDialog extends DialogWrapper {
   @Override
   protected void doOKAction() {
     super.doOKAction();
-    configurationPanel.apply(configuration);
+    configurationPanel.apply(connection);
   }
 }

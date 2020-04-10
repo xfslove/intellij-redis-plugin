@@ -1,7 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
 import com.github.xfslove.intellij.plugin.redis.RedisIcon;
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.ui.ColoredTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,9 +18,9 @@ public class RedisServerTreeRenderer extends ColoredTreeCellRenderer {
   public void customizeCellRenderer(@NotNull JTree jTree, Object value, boolean isSelected, boolean isExpanded, boolean isLeaf, int row, boolean focus) {
     DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 
-    Configuration configuration = (Configuration) node.getUserObject();
-    if (configuration != null) {
-      append(configuration.getName());
+    Connection connection = (Connection) node.getUserObject();
+    if (connection != null) {
+      append(connection.getName());
       setIcon(RedisIcon.get());
     }
   }

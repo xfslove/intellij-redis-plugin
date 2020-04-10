@@ -1,7 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.storage.Configuration;
-import com.github.xfslove.intellij.plugin.redis.storage.ConfigurationStorage;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
 import com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanel;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -21,10 +21,10 @@ import java.util.List;
  * @author wongiven
  * @date created at 2020/4/9
  */
-public class ConfigureServerAction extends DumbAwareAction {
+public class SelectConnectionAction extends DumbAwareAction {
 
-  public ConfigureServerAction() {
-    super("Configure Server");
+  public SelectConnectionAction() {
+    super("Select Connection");
   }
 
   @Override
@@ -32,11 +32,11 @@ public class ConfigureServerAction extends DumbAwareAction {
 
     Project project = e.getProject();
     // todo show list
-    ConfigurationStorage storage = ServiceManager.getService(project, ConfigurationStorage.class);
-    List<Configuration> configurationList = storage.getServerConfigurations();
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    List<Connection> connectionList = storage.getConnections();
 
     VirtualFile redisFile = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE);
-    redisFile.putUserData(ExplorerPanel.SELECTED_CONFIG, configurationList.get(0));
+    redisFile.putUserData(ExplorerPanel.SELECTED_CONFIG, connectionList.get(0));
 
     /*
        notification editor update
