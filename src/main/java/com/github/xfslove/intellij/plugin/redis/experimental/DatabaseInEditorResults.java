@@ -1,5 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.experimental;
 
+import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModel;
 import com.intellij.execution.ui.RunnerLayoutUi;
 import com.intellij.execution.ui.RunnerLayoutUi.Factory;
 import com.intellij.icons.AllIcons.Actions;

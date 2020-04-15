@@ -1,5 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.experimental;
 
+import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModel;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.TextRange;

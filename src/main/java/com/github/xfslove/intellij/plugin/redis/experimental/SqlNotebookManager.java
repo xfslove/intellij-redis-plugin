@@ -27,6 +27,8 @@
  */
 package com.github.xfslove.intellij.plugin.redis.experimental;
 
+import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModel;
+import com.github.xfslove.intellij.plugin.redis.experimental.script.CommandIterator;
 import com.intellij.lang.LanguageParserDefinitions;
 import com.intellij.lang.ParserDefinition;
 import com.intellij.openapi.util.Condition;
@@ -95,7 +97,7 @@ public class SqlNotebookManager {
     ArrayList<TextRange> curRanges = new ArrayList<>();
     ArrayList<Cell> result = new ArrayList<>();
 
-    for (ScriptModel.StatementIt<E> statement : model.statements()) {
+    for (CommandIterator<E> statement : model.statements()) {
       TextRange current = statement.range();
       if (current.getEndOffset() <= start2 || statement.object() instanceof PsiFile || !filter2.value(current)) {
         continue;
@@ -153,7 +155,7 @@ public class SqlNotebookManager {
   }
 
   @NotNull
-  private <E> TextRange captureComments(@NotNull ScriptModel.StatementIt<E> statement) {
+  private <E> TextRange captureComments(@NotNull CommandIterator<E> statement) {
     SyntaxTraverser.Api api;
     Object element2;
     Object comment;
@@ -170,7 +172,7 @@ public class SqlNotebookManager {
     result.add(new Cell(TextRange.create(first2.getStartOffset(), cellEnd), ranges, last.getEndOffset()));
   }
 
-  private static boolean isCrossCellGap(@NotNull PsiFile file, @NotNull ScriptModel.StatementIt<?> statement, @NotNull TextRange prev, @NotNull TextRange range) {
+  private static boolean isCrossCellGap(@NotNull PsiFile file, @NotNull CommandIterator<?> statement, @NotNull TextRange prev, @NotNull TextRange range) {
     if (isResultsFree(statement)) {
       return true;
     }
@@ -178,7 +180,7 @@ public class SqlNotebookManager {
     return text2.substring(prev.getEndOffset(), range.getStartOffset()).contains("\n\n");
   }
 
-  private static boolean isResultsFree(@NotNull ScriptModel.StatementIt<?> statement) {
+  private static boolean isResultsFree(@NotNull CommandIterator<?> statement) {
 //    PsiElement element2 = ObjectUtils.tryCast(statement.object(), PsiElement.class);
     return false;
   }
