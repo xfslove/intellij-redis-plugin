@@ -43,12 +43,11 @@ package com.github.xfslove.intellij.plugin.redis.experimental.script;
 
 import com.github.xfslove.intellij.plugin.redis.lang.RedisCommand;
 import com.intellij.openapi.Disposable;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import com.intellij.util.containers.JBIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,12 +56,8 @@ public class CommandModel<E> extends ScriptModel<E> {
 
   private final Script<E> myScript;
 
-  public CommandModel(@NotNull PsiFile file) {
-    this(file.getProject(), file.getViewProvider().getVirtualFile());
-  }
-
-  public CommandModel(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-    this(newScriptFor(project, virtualFile));
+  public CommandModel(@NotNull Editor editor) {
+    this(newScriptFor(editor));
   }
 
   private CommandModel(@NotNull Script<E> script) {
@@ -70,18 +65,13 @@ public class CommandModel<E> extends ScriptModel<E> {
   }
 
   @NotNull
-  private static <E> Script<E> newScriptFor(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-    return new TrackingDocScript<>(project, virtualFile, ScriptModelUtil.getScriptDocument(virtualFile));
+  private static <E> Script<E> newScriptFor(@NotNull Editor editor) {
+    return new TrackingDocScript<>(editor.getProject(), editor.getDocument());
   }
 
   public JBIterable<CommandIterator<E>> commands() {
     return statements()
         .filter(Conditions.compose(ModelIterator::object, Conditions.instanceOf(RedisCommand.class)));
-  }
-
-  @Override
-  public VirtualFile getVirtualFile() {
-    return this.myScript.getVirtualFile();
   }
 
   @Override

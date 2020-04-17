@@ -2,7 +2,7 @@ package com.github.xfslove.intellij.plugin.redis.experimental;
 
 import com.github.xfslove.intellij.plugin.redis.experimental.script.Cell;
 import com.github.xfslove.intellij.plugin.redis.experimental.script.CellsAccessor;
-import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModel;
+import com.github.xfslove.intellij.plugin.redis.experimental.script.CommandModel;
 import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModelUtil;
 import com.intellij.execution.ui.RunnerLayoutUi;
 import com.intellij.execution.ui.RunnerLayoutUi.Factory;
@@ -68,7 +68,7 @@ public class DatabaseInEditorResults {
 
     if (!args.editor.isDisposed() && EditorUtil.isRealFileEditor(args.editor)) {
       PsiFile file = args.file;
-      CellsAccessor accessor = ReadAction.compute(() -> ScriptModelUtil.getCellAccessor(file, args.model));
+      CellsAccessor accessor = ReadAction.compute(() -> ScriptModelUtil.getCellAccessor(file, new CommandModel<>(args.editor)));
       Cell cell = this.getCell(accessor, args);
       return cell == null ? null : this.getContainer(args, cell);
     } else {
@@ -107,8 +107,8 @@ public class DatabaseInEditorResults {
     }
 
     TextRange range = arguments.range;
-    int offset = range.getEndOffset() - 1;
-//      int offset = Math.max(range.getStartOffset(), range.getEndOffset() - 1);
+    TextRange adjusted = ScriptModelUtil.getOffsetLineRange(arguments.editor, range.getEndOffset());
+    int offset = adjusted.getEndOffset() - 1;
     Cell cell = accessor.getCell(offset);
     if (cell == null) {
       return null;
@@ -683,22 +683,17 @@ public class DatabaseInEditorResults {
   }
 
   public static class Arguments {
+
     final EditorEx editor;
     final PsiFile file;
     final String title;
     final TextRange range;
-    final ScriptModel<?> model;
 
-    public Arguments(@NotNull EditorEx editor,
-                     @NotNull PsiFile file,
-                     @NotNull String title,
-                     @NotNull TextRange range,
-                     ScriptModel<?> model) {
+    public Arguments(@NotNull String title, @NotNull EditorEx editor, @NotNull PsiFile file, @NotNull TextRange range) {
       this.editor = editor;
       this.file = file;
       this.title = title;
       this.range = range;
-      this.model = model;
     }
   }
 

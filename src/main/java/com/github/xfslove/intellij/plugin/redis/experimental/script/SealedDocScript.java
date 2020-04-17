@@ -4,7 +4,6 @@ import com.github.xfslove.intellij.plugin.redis.lang.RedisLanguage;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SyntaxTraverser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,15 +16,15 @@ class SealedDocScript<E> extends DocScript<E> {
   SyntaxTraverser<E> cached;
   SyntaxTraverser<E> raw;
 
-  SealedDocScript(Project project, VirtualFile file, Document document) {
-    super(project, file, document, null);
+  SealedDocScript(Project project, Document document) {
+    super(project, document, null);
     this.text = document.getImmutableCharSequence();
     this.timeStamp = document.getModificationStamp();
     this.parent = null;
   }
 
   SealedDocScript(SealedDocScript<E> parent, TextRange range) {
-    super(parent.project, parent.vFile, parent.document, range);
+    super(parent.project, parent.document, range);
     this.text = parent.text;
     this.timeStamp = parent.timeStamp;
     this.parent = parent;
@@ -60,8 +59,6 @@ class SealedDocScript<E> extends DocScript<E> {
 
   @NotNull
   SyntaxTraverser<E> getScriptImpl() {
-//    boolean position = this.range instanceof PositionRange;
-//    boolean inRange = !position && this.range != null;
     if (this.range != null) {
       return ScriptModelUtil.parse(this.project, this.range.subSequence(this.text), RedisLanguage.INSTANCE);
     }

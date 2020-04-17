@@ -3,7 +3,6 @@ package com.github.xfslove.intellij.plugin.redis.experimental.script;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.SyntaxTraverser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +21,4 @@ public interface Script<V> {
   @NotNull
   Project getProject();
 
-  @NotNull
-  VirtualFile getVirtualFile();
 }

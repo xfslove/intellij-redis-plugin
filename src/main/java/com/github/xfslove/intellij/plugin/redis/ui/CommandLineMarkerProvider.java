@@ -25,9 +25,6 @@ public class CommandLineMarkerProvider extends RunLineMarkerContributor {
       RedisCommand command = PsiTreeUtil.getParentOfType(element, RedisCommand.class);
       if (command != null) {
 
-//        Project project = element.getProject();
-//        PsiFile containingFile = element.getContainingFile();
-
         VirtualFile virtualFile = element.getContainingFile().getVirtualFile();
         Connection selectedConnection = virtualFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
 
@@ -35,7 +32,7 @@ public class CommandLineMarkerProvider extends RunLineMarkerContributor {
           return null;
         }
         return new Info(AllIcons.RunConfigurations.TestState.Run,
-            new AnAction[] {new ExecCommandAction()}, (psiElement) -> "Run Command");
+            new AnAction[] {new ExecCommandAction(element)}, e -> "Run Command");
       }
     }
 

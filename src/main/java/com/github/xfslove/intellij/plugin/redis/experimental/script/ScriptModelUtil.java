@@ -94,7 +94,6 @@ public class ScriptModelUtil {
   @NotNull
   private static CellsAccessor getCachedAccessor(@NotNull PsiFile file) {
     return CachedValuesManager.getCachedValue(file, () -> CachedValueProvider.Result.create(new CellsAccessor(), file));
-
   }
 
   @NotNull
@@ -107,19 +106,22 @@ public class ScriptModelUtil {
     return (SyntaxTraverser<E>) SyntaxTraverser.psiTraverser(psiFile).expand(Conditions.alwaysFalse()).withTraversal(TreeTraversal.LEAVES_DFS);
   }
 
-  @Nullable
-  public static Document getScriptDocument(VirtualFile virtualFile) {
-    return virtualFile instanceof ReadOnlyLightVirtualFile || SingleRootFileViewProvider.isTooLargeForIntelligence(virtualFile) ?
-        null : FileDocumentManager.getInstance().getDocument(virtualFile);
-  }
-
   @NotNull
-  public static TextRange getSelectionForConsole(@Nullable Editor editor) {
+  public static TextRange getSelectionRange(@Nullable Editor editor) {
     if (editor == null) {
       return TextRange.EMPTY_RANGE;
     }
     Caret caret = editor.getCaretModel().getPrimaryCaret();
     return TextRange.create(caret.getSelectionStart(), caret.getSelectionEnd());
+  }
+
+  public static TextRange getOffsetLineRange(@Nullable Editor editor, int offset) {
+    if (editor == null) {
+      return TextRange.EMPTY_RANGE;
+    }
+    Document document = editor.getDocument();
+    int lineNumber = document.getLineNumber(offset);
+    return TextRange.create(document.getLineStartOffset(lineNumber), document.getLineEndOffset(lineNumber));
   }
 
 }
