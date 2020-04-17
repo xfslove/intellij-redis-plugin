@@ -9,13 +9,11 @@ import com.intellij.util.containers.JBIterator;
 public class CommandIterator<E> extends JBIterator<E> implements ModelIterator<E> {
 
   final SyntaxTraverser<E> traverser;
-  final long rangeOffset;
   final JBIterator<E> vIt;
 
   CommandIterator(SyntaxTraverser<E> syntaxTraverser) {
     this.traverser = syntaxTraverser;
     vIt = from(syntaxTraverser.iterator());
-    rangeOffset = ScriptModelUtil. getPartOffset(syntaxTraverser);
   }
 
   public JBIterable<CommandIterator<E>> cursor() {
@@ -45,11 +43,6 @@ public class CommandIterator<E> extends JBIterator<E> implements ModelIterator<E
   @Override
   public SyntaxTraverser.Api<E> api() {
     return this.traverser.api;
-  }
-
-  @Override
-  public long rangeOffset() {
-    return this.rangeOffset;
   }
 
   @Override

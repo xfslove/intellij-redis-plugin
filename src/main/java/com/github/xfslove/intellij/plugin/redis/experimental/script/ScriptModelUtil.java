@@ -54,32 +54,48 @@
  */
 package com.github.xfslove.intellij.plugin.redis.experimental.script;
 
-import com.github.xfslove.intellij.plugin.redis.experimental.PositionRange;
-import com.github.xfslove.intellij.plugin.redis.lang.RedisCommand;
 import com.intellij.lang.Language;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.actions.EditorActionUtil;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Conditions;
-import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.SingleRootFileViewProvider;
 import com.intellij.psi.SyntaxTraverser;
+import com.intellij.psi.util.CachedValueProvider;
+import com.intellij.psi.util.CachedValuesManager;
 import com.intellij.testFramework.ReadOnlyLightVirtualFile;
-import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.TreeTraversal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ScriptModelUtil {
 
-  public static final Key<Long> PART_OFFSET = Key.create("PART_OFFSET");
+  @Nullable
+  public static CellsAccessor getCellAccessor(@NotNull PsiFile file, ScriptModel<?> model) {
+    if (SingleRootFileViewProvider.isTooLargeForIntelligence(file.getVirtualFile())) {
+      return null;
+    }
+    return getPreparedAccessor(file, model);
+  }
+
+  @NotNull
+  private static CellsAccessor getPreparedAccessor(@NotNull PsiFile file, ScriptModel<?> model) {
+    CellsAccessor accessor = getCachedAccessor(file);
+    accessor.compute(model);
+    return accessor;
+  }
+
+  @NotNull
+  private static CellsAccessor getCachedAccessor(@NotNull PsiFile file) {
+    return CachedValuesManager.getCachedValue(file, () -> CachedValueProvider.Result.create(new CellsAccessor(), file));
+
+  }
 
   @NotNull
   public static <E> SyntaxTraverser<E> parse(@NotNull Project project, @NotNull CharSequence documentText, @NotNull Language language) {
@@ -91,10 +107,10 @@ public class ScriptModelUtil {
     return (SyntaxTraverser<E>) SyntaxTraverser.psiTraverser(psiFile).expand(Conditions.alwaysFalse()).withTraversal(TreeTraversal.LEAVES_DFS);
   }
 
-  @NotNull
-  public static TextRange getSelectedCommandRange(@NotNull ScriptModel<?> model, @NotNull Editor editor) {
-    TextRange range = ScriptModelUtil.getSelectionForConsole(editor);
-    return ScriptModelUtil.adjustSelectionRange(model, editor.getDocument(), range);
+  @Nullable
+  public static Document getScriptDocument(VirtualFile virtualFile) {
+    return virtualFile instanceof ReadOnlyLightVirtualFile || SingleRootFileViewProvider.isTooLargeForIntelligence(virtualFile) ?
+        null : FileDocumentManager.getInstance().getDocument(virtualFile);
   }
 
   @NotNull
@@ -104,55 +120,6 @@ public class ScriptModelUtil {
     }
     Caret caret = editor.getCaretModel().getPrimaryCaret();
     return TextRange.create(caret.getSelectionStart(), caret.getSelectionEnd());
-  }
-
-  @NotNull
-  public static TextRange adjustSelectionRange(@NotNull ScriptModel<?> model, @NotNull Document document, @NotNull TextRange selectionRange) {
-    if (selectionRange.isEmpty()) {
-
-      CharSequence sequence = document.getCharsSequence();
-      int sequenceLength = sequence.length();
-      if (sequenceLength == 0) {
-        return selectionRange;
-      }
-      int offset = Math.min(sequenceLength - 1, selectionRange.getStartOffset());
-      if (!Character.isWhitespace(sequence.charAt(offset))) {
-        ++offset;
-      }
-      int lineNumber = document.getLineNumber(offset);
-      int lineStart = document.getLineStartOffset(lineNumber);
-      int lineEnd = document.getLineEndOffset(lineNumber);
-      int lineStartFixed = EditorActionUtil.findFirstNonSpaceOffsetInRange(sequence, lineStart, lineEnd);
-      TextRange subRange = TextRange.create(lineStartFixed, Math.max(lineStartFixed, offset));
-      PositionRange positionRange = new PositionRange(subRange);
-
-      // filter last command range
-      TextRange range = model
-          .subModel(positionRange)
-          .statements()
-          .filter(Conditions.compose(ModelIterator::object, Conditions.instanceOf(RedisCommand.class)))
-          .transform(it2 -> it2.range().shiftRight((int) it2.rangeOffset()))
-          .last();
-      if (lineStartFixed >= 0 && range != null) {
-        return range;
-      }
-
-      return selectionRange;
-    }
-
-    return selectionRange;
-
-  }
-
-  public static long getPartOffset(SyntaxTraverser<?> s) {
-    Long o = s.getUserData(PART_OFFSET);
-    return o == null ? 0L : o;
-  }
-
-  @Nullable
-  public static Document getScriptDocument(VirtualFile virtualFile) {
-    return virtualFile instanceof ReadOnlyLightVirtualFile || SingleRootFileViewProvider.isTooLargeForIntelligence(virtualFile) ?
-        null : FileDocumentManager.getInstance().getDocument(virtualFile);
   }
 
 }

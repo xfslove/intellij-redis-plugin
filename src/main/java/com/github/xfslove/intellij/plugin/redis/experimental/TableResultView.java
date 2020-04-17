@@ -62,6 +62,7 @@
 // */
 //package com.github.xfslove.intellij.plugin.redis;
 //
+//import com.github.xfslove.intellij.plugin.redis.experimental.JBTableWithResizableCells;
 //import com.intellij.application.options.EditorFontsConstants;
 //import com.intellij.find.FindModel;
 //import com.intellij.find.SearchSession;

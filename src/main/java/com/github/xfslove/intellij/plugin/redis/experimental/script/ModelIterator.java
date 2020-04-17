@@ -14,7 +14,5 @@ public interface ModelIterator<E> {
 
   SyntaxTraverser.Api<E> api();
 
-  long rangeOffset();
-
   E object();
 }

@@ -1,15 +1,15 @@
 package com.github.xfslove.intellij.plugin.redis.experimental;
 
+import com.github.xfslove.intellij.plugin.redis.experimental.script.Cell;
+import com.github.xfslove.intellij.plugin.redis.experimental.script.CellsAccessor;
 import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModel;
+import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModelUtil;
 import com.intellij.execution.ui.RunnerLayoutUi;
 import com.intellij.execution.ui.RunnerLayoutUi.Factory;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionGroup;
-import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.command.undo.BasicUndoableAction;
@@ -31,7 +31,6 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.view.FontLayoutService;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiFile;
@@ -46,7 +45,6 @@ import com.intellij.util.ui.EmptyIcon;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.MouseEventAdapter;
 import com.intellij.util.ui.UIUtil;
-import gnu.trove.TIntArrayList;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,8 +68,8 @@ public class DatabaseInEditorResults {
 
     if (!args.editor.isDisposed() && EditorUtil.isRealFileEditor(args.editor)) {
       PsiFile file = args.file;
-      SqlNotebookModel.CellsAccessor accessor = ReadAction.compute(() -> SqlNotebookModel.getCellAccessor(file, args.model, Conditions.alwaysTrue()));
-      SqlNotebookManager.Cell cell = this.getCell(accessor, args);
+      CellsAccessor accessor = ReadAction.compute(() -> ScriptModelUtil.getCellAccessor(file, args.model));
+      Cell cell = this.getCell(accessor, args);
       return cell == null ? null : this.getContainer(args, cell);
     } else {
       return null;
@@ -103,22 +101,22 @@ public class DatabaseInEditorResults {
   }
 
   @Nullable
-  private SqlNotebookManager.Cell getCell(@NotNull SqlNotebookModel.CellsAccessor accessor, @NotNull Arguments arguments) {
-
-    if (!arguments.editor.isDisposed() && EditorUtil.isRealFileEditor(arguments.editor)) {
-      TextRange range = arguments.range;
-      int offset = Math.max(range.getStartOffset(), range.getEndOffset() - 1);
-      SqlNotebookManager.Cell cell = accessor.getCell(new LayoutProvider(arguments.editor), offset);
-      if (cell == null) {
-        return null;
-      } else {
-        DocumentEx document = arguments.editor.getDocument();
-        int lsOffset = document.getLineStartOffset(document.getLineNumber(cell.lastStatementEnd));
-        return isVisibleVertically(arguments.editor, arguments.editor.offsetToXY(lsOffset)) ? cell : argsToCell(arguments, range);
-      }
-    } else {
+  private Cell getCell(@NotNull CellsAccessor accessor, @NotNull Arguments arguments) {
+    if (arguments.editor.isDisposed() || !EditorUtil.isRealFileEditor(arguments.editor)) {
       return null;
     }
+
+    TextRange range = arguments.range;
+    int offset = range.getEndOffset() - 1;
+//      int offset = Math.max(range.getStartOffset(), range.getEndOffset() - 1);
+    Cell cell = accessor.getCell(offset);
+    if (cell == null) {
+      return null;
+    }
+
+    DocumentEx document = arguments.editor.getDocument();
+    int lsOffset = document.getLineStartOffset(document.getLineNumber(cell.lastStatementEnd));
+    return isVisibleVertically(arguments.editor, arguments.editor.offsetToXY(lsOffset)) ? cell : argsToCell(arguments, range);
   }
 
   private static boolean isVisibleVertically(@NotNull EditorEx editor, @NotNull Point point) {
@@ -129,15 +127,15 @@ public class DatabaseInEditorResults {
   }
 
   @NotNull
-  private static SqlNotebookManager.Cell argsToCell(@NotNull Arguments arguments, @NotNull TextRange range) {
+  private static Cell argsToCell(@NotNull Arguments arguments, @NotNull TextRange range) {
 
     int lineEnd = getLineEnd(arguments.editor, range.getEndOffset());
     TextRange finalRange = TextRange.create(range.getStartOffset(), lineEnd);
-    return new SqlNotebookManager.Cell(finalRange, Collections.singletonList(finalRange), lineEnd);
+    return new Cell(finalRange, Collections.singletonList(finalRange));
   }
 
   @NotNull
-  private ResultConstructor getContainer(@NotNull Arguments args, @NotNull SqlNotebookManager.Cell cell) {
+  private ResultConstructor getContainer(@NotNull Arguments args, @NotNull Cell cell) {
 
     Editor editor = args.editor;
     ResultConstructor found = this.findContainer(editor, cell);
@@ -185,7 +183,7 @@ public class DatabaseInEditorResults {
   }
 
   @Nullable
-  private ResultConstructor findContainer(@NotNull Editor editor, @NotNull SqlNotebookManager.Cell cell) {
+  private ResultConstructor findContainer(@NotNull Editor editor, @NotNull Cell cell) {
 
     Collection<ResultConstructor> containers = this.getUncollectedResults(editor);
     Iterator<ResultConstructor> iterator = containers.iterator();
@@ -218,14 +216,23 @@ public class DatabaseInEditorResults {
 
   @Nullable
   private static ResultConstructor asResult(@NotNull ContainerWeakRef ref) {
-
     EditorResultsContainer container = ref.get();
-    if (container != null && (!ref.isOutdated() || container.isShown())) {
-      return container;
-    } else {
+    if (container == null) {
       ref.dispose();
       return null;
     }
+
+    if (ref.isOutdated()) {
+      ref.dispose();
+      return null;
+    }
+
+    if (!container.isShown()) {
+      ref.dispose();
+      return null;
+    }
+
+    return container;
   }
 
   private static int getEditorTextWidth(@NotNull EditorImpl editor) {
@@ -270,34 +277,6 @@ public class DatabaseInEditorResults {
 
   }
 
-  private class LayoutProvider implements SqlNotebookModel.EditorLayoutProvider {
-    private final Editor myEditor;
-
-    LayoutProvider(Editor editor) {
-      this.myEditor = editor;
-    }
-
-    @Override
-    public int[] getInlayOffsets(@NotNull TextRange range) {
-
-      ApplicationManager.getApplication().assertIsDispatchThread();
-      TIntArrayList result = new TIntArrayList();
-
-      for (Result container : DatabaseInEditorResults.this.getUncollectedResults(this.myEditor)) {
-        if (container != null && container.isShown() && range.contains(container.getOffset())) {
-          result.add(container.getOffset());
-        }
-      }
-
-      return result.toNativeArray();
-    }
-
-    @Override
-    public int getInlayLength() {
-      return 0;
-    }
-  }
-
   private static class RemoveCellAction extends AnAction {
     private final ResultConstructor myResult;
 
@@ -326,8 +305,6 @@ public class DatabaseInEditorResults {
     private final Icon myIcon;
 
     CloseRenderer(@NotNull ResultConstructor result, int height) {
-
-
       this.myResult = result;
       this.myAction = new RemoveCellAction(this.myResult);
       this.myIcon = new CloseRenderer.MyIcon(height);
@@ -370,7 +347,7 @@ public class DatabaseInEditorResults {
     }
 
     private static class MyIcon implements Icon {
-      private static final Icon CLOSE;
+      private static final Icon CLOSE = Actions.Close;
       private final int myOffset;
 
       MyIcon(int offset) {
@@ -390,10 +367,6 @@ public class DatabaseInEditorResults {
       @Override
       public void paintIcon(Component c, Graphics g, int x, int y) {
         CLOSE.paintIcon(c, g, x, y + this.myOffset);
-      }
-
-      static {
-        CLOSE = Actions.Close;
       }
     }
   }
@@ -428,8 +401,6 @@ public class DatabaseInEditorResults {
     private boolean myInProgress;
 
     EditorResultsContainer(@NotNull Disposable parent, @NotNull EditorEx editor, @NotNull String title, @NotNull BooleanFunction<EditorResultsContainer> isAlive, int initialOffset) {
-
-
       this.myParent = parent;
       this.myEditor = editor;
       this.myIsAlive = isAlive;
@@ -438,7 +409,8 @@ public class DatabaseInEditorResults {
       this.myScrollBarListener = new EditorResultsContainer.MyScrollBarListener(this.myLastScrollEvent);
       this.myUi = Factory.getInstance(Objects.requireNonNull(editor.getProject())).create("not_persistent_id", title, title, parent);
       this.myUi.getDefaults().initTabDefaults(0, "not_persistent_id", (Icon) null);
-      this.myUi.getOptions().setMoveToGridActionEnabled(false).setMinimizeActionEnabled(false).setTabPopupActions((ActionGroup) ActionManager.getInstance().getAction("Console.TabPopupGroup.Embedded"));
+      this.myUi.getOptions().setMoveToGridActionEnabled(false).setMinimizeActionEnabled(false);
+//          .setTabPopupActions((ActionGroup) ActionManager.getInstance().getAction("Console.TabPopupGroup.Embedded"));
       this.myShown = true;
       this.myWeakRef = new ContainerWeakRef(this, parent);
     }
@@ -721,7 +693,7 @@ public class DatabaseInEditorResults {
                      @NotNull PsiFile file,
                      @NotNull String title,
                      @NotNull TextRange range,
-                     ScriptModel model) {
+                     ScriptModel<?> model) {
       this.editor = editor;
       this.file = file;
       this.title = title;

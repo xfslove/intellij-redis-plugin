@@ -1,6 +1,5 @@
 package com.github.xfslove.intellij.plugin.redis.experimental.script;
 
-import com.github.xfslove.intellij.plugin.redis.experimental.PositionRange;
 import com.github.xfslove.intellij.plugin.redis.lang.RedisLanguage;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
@@ -61,12 +60,10 @@ class SealedDocScript<E> extends DocScript<E> {
 
   @NotNull
   SyntaxTraverser<E> getScriptImpl() {
-    boolean position = this.range instanceof PositionRange;
-    boolean inRange = !position && this.range != null;
-    if (inRange) {
-      SyntaxTraverser<E> exact = ScriptModelUtil.parse(this.project, this.range.subSequence(this.text), RedisLanguage.INSTANCE);
-      exact.putUserData(ScriptModelUtil.PART_OFFSET, (long) this.range.getStartOffset());
-      return exact;
+//    boolean position = this.range instanceof PositionRange;
+//    boolean inRange = !position && this.range != null;
+    if (this.range != null) {
+      return ScriptModelUtil.parse(this.project, this.range.subSequence(this.text), RedisLanguage.INSTANCE);
     }
     return this.parseRaw();
   }
