@@ -15,4 +15,6 @@ public interface ModelIterator<E> {
   SyntaxTraverser.Api<E> api();
 
   E object();
+
+  String key();
 }

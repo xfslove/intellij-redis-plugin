@@ -1,5 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
+import com.github.xfslove.intellij.plugin.redis.lang.RedisTypes;
 import com.github.xfslove.intellij.plugin.redis.script.CommandIterator;
 import com.github.xfslove.intellij.plugin.redis.script.CommandModel;
 import com.github.xfslove.intellij.plugin.redis.ui.InEditorResultUi;
@@ -31,30 +32,40 @@ public class ExecCommandAction extends DumbAwareAction {
 
     Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
     Document document = editor.getDocument();
-    int lineNumber = document.getLineNumber(element.getTextOffset());
-    int lineStartOffset = document.getLineStartOffset(lineNumber);
-    int lineEndOffset = document.getLineEndOffset(lineNumber);
+    int startOffset = element.getTextOffset();
+    int lineNumber = document.getLineNumber(startOffset);
+    int endOffset = document.getLineEndOffset(lineNumber);
 
     InEditorResultUi editorResults = ServiceManager.getService(e.getProject(), InEditorResultUi.class);
-    InEditorResultUi.Result result = editorResults.getOrCreateResult(editor, lineEndOffset);
+    InEditorResultUi.ResultConstructor result = editorResults.getOrCreateResult(editor, endOffset);
 
     if (result == null) {
       return;
     }
 
-    TextRange textRange = TextRange.create(lineStartOffset, lineEndOffset);
+    result.setInProgress(true);
+
+    TextRange textRange = TextRange.create(startOffset, endOffset);
     CommandModel model = new CommandModel(editor);
     CommandModel subModel = model.subModel(textRange);
-    CommandIterator<PsiElement> first = subModel.commands().first();
+    CommandIterator command = subModel.statements().first();
 
-    ResultPanel panel = new ResultPanel();
-    RunnerLayoutUi ui = result.getUi();
-    Content content = ui.createContent("resultPanel#" + element.getTextOffset(), new ComponentWithActions.Impl(panel.getRootPanel()), "", null, panel.getResultPanel());
-    content.setCloseable(true);
-    content.setPinnable(true);
-    ui.addContent(content);
-    result.show();
 
+    System.out.println(command.text());
+    System.out.println(command.range());
+    System.out.println(command.key());
+
+    System.out.println("==========================");
+
+//    ResultPanel panel = new ResultPanel();
+//    RunnerLayoutUi ui = result.getUi();
+//    Content content = ui.createContent("resultPanel#" + element.getTextOffset(), new ComponentWithActions.Impl(panel.getRootPanel()), "", null, panel.getResultPanel());
+//    content.setCloseable(true);
+//    content.setPinnable(true);
+//    ui.addContent(content);
+//    result.show();
+
+    result.setInProgress(false);
   }
 
 }

@@ -1,52 +1,67 @@
 package com.github.xfslove.intellij.plugin.redis.script;
 
+import com.github.xfslove.intellij.plugin.redis.lang.RedisTypes;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.JBIterator;
 
-public class CommandIterator<E> extends JBIterator<E> implements ModelIterator<E> {
+public class CommandIterator extends JBIterator<PsiElement> implements ModelIterator<PsiElement> {
 
-  final SyntaxTraverser<E> traverser;
-  final JBIterator<E> vIt;
+  final SyntaxTraverser.Api<PsiElement> api;
+  final JBIterator<PsiElement> vIt;
 
-  CommandIterator(SyntaxTraverser<E> syntaxTraverser) {
-    this.traverser = syntaxTraverser;
-    vIt = from(syntaxTraverser.iterator());
+  CommandIterator(SyntaxTraverser<PsiElement> traverser) {
+    this.api = traverser.api;
+    vIt = from(traverser.iterator());
   }
 
-  public JBIterable<CommandIterator<E>> cursor() {
+  CommandIterator(SyntaxTraverser.Api<PsiElement> api, JBIterable<PsiElement> elements) {
+    this.api = api;
+    vIt = from(elements.iterator());
+  }
+
+  public JBIterable<CommandIterator> cursor() {
     return JBIterator.cursor(this);
   }
 
   @Override
-  public final E object() {
+  public String key() {
+    PsiElement key = api().children(object()).find(e -> api().typeOf(e).equals(RedisTypes.KEY));
+    return key == null ? null : api().textOf(key).toString();
+  }
+
+  @Override
+  public final PsiElement object() {
     return this.current();
   }
 
   @Override
   public final String text() {
-    return this.traverser.api.textOf(object()).toString();
+    return api().textOf(object()).toString();
   }
 
   @Override
   public final TextRange range() {
-    return this.traverser.api.rangeOf(object());
+    return api().rangeOf(object());
   }
 
   @Override
   public final IElementType type() {
-    return this.traverser.api.typeOf(object());
+    return api().typeOf(object());
   }
 
   @Override
-  public SyntaxTraverser.Api<E> api() {
-    return this.traverser.api;
+  public SyntaxTraverser.Api<PsiElement> api() {
+    return api;
   }
 
   @Override
-  protected E nextImpl() {
-    return this.vIt.hasNext() ? this.vIt.next() : this.stop();
+  protected PsiElement nextImpl() {
+    return vIt.hasNext() ? vIt.next() : this.stop();
   }
 }

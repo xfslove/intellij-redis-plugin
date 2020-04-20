@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package com.github.xfslove.intellij.plugin.redis.script;
 
 import com.intellij.openapi.Disposable;
@@ -14,7 +9,7 @@ public abstract class ScriptModel<E> implements Disposable {
 
   public abstract ScriptModel<E> subModel(@Nullable TextRange textRange);
 
-  public abstract JBIterable<CommandIterator<E>> statements();
+  public abstract JBIterable<CommandIterator> statements();
 
   public abstract TextRange getTextRange();
 
