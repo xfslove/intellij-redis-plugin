@@ -1,41 +1,29 @@
-package com.github.xfslove.intellij.plugin.redis.experimental;
+package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.experimental.script.Cell;
-import com.github.xfslove.intellij.plugin.redis.experimental.script.CellsAccessor;
-import com.github.xfslove.intellij.plugin.redis.experimental.script.CommandModel;
-import com.github.xfslove.intellij.plugin.redis.experimental.script.ScriptModelUtil;
 import com.intellij.execution.ui.RunnerLayoutUi;
 import com.intellij.execution.ui.RunnerLayoutUi.Factory;
 import com.intellij.icons.AllIcons.Actions;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.command.undo.BasicUndoableAction;
 import com.intellij.openapi.command.undo.UndoManager;
 import com.intellij.openapi.command.undo.UndoableAction;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.Inlay;
-import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.colors.EditorColors;
-import com.intellij.openapi.editor.ex.DocumentEx;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager;
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager.Properties;
 import com.intellij.openapi.editor.impl.EditorEmbeddedComponentManager.ResizePolicy;
-import com.intellij.openapi.editor.impl.EditorHeaderComponent;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.view.FontLayoutService;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiFile;
 import com.intellij.ui.border.CustomLineBorder;
-import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentManagerEvent;
 import com.intellij.ui.content.ContentManagerListener;
 import com.intellij.util.BooleanFunction;
@@ -58,87 +46,24 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class DatabaseInEditorResults {
+public class InEditorResultUi {
 
-  private static final int MAX_ROWS = 7;
   private final MultiMap<Editor, ContainerWeakRef> myContainers = new MultiMap<>();
 
   @Nullable
-  public ResultConstructor getOrCreateResult(@NotNull Arguments args) {
+  public ResultConstructor getOrCreateResult(@NotNull Editor editor, int offset) {
 
-    if (!args.editor.isDisposed() && EditorUtil.isRealFileEditor(args.editor)) {
-      PsiFile file = args.file;
-      CellsAccessor accessor = ReadAction.compute(() -> ScriptModelUtil.getCellAccessor(file, new CommandModel<>(args.editor)));
-      Cell cell = this.getCell(accessor, args);
-      return cell == null ? null : this.getContainer(args, cell);
+    if (!editor.isDisposed() && EditorUtil.isRealFileEditor(editor)) {
+      return this.getContainer(editor, offset);
     } else {
       return null;
     }
   }
 
-  public void scrollTo(@NotNull Result result, @NotNull Editor editor) {
-
-    Document document = editor.getDocument();
-    int line = document.getLineNumber(result.getOffset());
-    int lStart = document.getLineStartOffset(line);
-    editor.getScrollingModel().scrollTo(editor.offsetToLogicalPosition(lStart), ScrollType.MAKE_VISIBLE);
-  }
-
   @NotNull
-  public Collection<? extends RunnerLayoutUi> getUis() {
+  private ResultConstructor getContainer(@NotNull Editor editor, int offset) {
 
-    return ContainerUtil.map(ContainerUtil.filter(this.getUncollectedResults(), Result::isShown), Result::getUi);
-  }
-
-  public void show(@NotNull Result result, @NotNull Content content, @NotNull Editor editor) {
-
-    result.show();
-    UIUtil.uiTraverser(content.getComponent()).filter(EditorHeaderComponent.class).forEach((t) -> {
-      t.addMouseWheelListener((event) -> {
-        MouseEventAdapter.redispatch(event, editor.getContentComponent());
-      });
-    });
-  }
-
-  @Nullable
-  private Cell getCell(@NotNull CellsAccessor accessor, @NotNull Arguments arguments) {
-    if (arguments.editor.isDisposed() || !EditorUtil.isRealFileEditor(arguments.editor)) {
-      return null;
-    }
-
-    TextRange range = arguments.range;
-    TextRange adjusted = ScriptModelUtil.getOffsetLineRange(arguments.editor, range.getEndOffset());
-    int offset = adjusted.getEndOffset() - 1;
-    Cell cell = accessor.getCell(offset);
-    if (cell == null) {
-      return null;
-    }
-
-    DocumentEx document = arguments.editor.getDocument();
-    int lsOffset = document.getLineStartOffset(document.getLineNumber(cell.lastStatementEnd));
-    return isVisibleVertically(arguments.editor, arguments.editor.offsetToXY(lsOffset)) ? cell : argsToCell(arguments, range);
-  }
-
-  private static boolean isVisibleVertically(@NotNull EditorEx editor, @NotNull Point point) {
-
-    Rectangle visibleArea = editor.getScrollingModel().getVisibleArea();
-    Point areaXInlayY = new Point(visibleArea.x, point.y);
-    return visibleArea.contains(areaXInlayY);
-  }
-
-  @NotNull
-  private static Cell argsToCell(@NotNull Arguments arguments, @NotNull TextRange range) {
-
-    int lineEnd = getLineEnd(arguments.editor, range.getEndOffset());
-    TextRange finalRange = TextRange.create(range.getStartOffset(), lineEnd);
-    return new Cell(finalRange, Collections.singletonList(finalRange));
-  }
-
-  @NotNull
-  private ResultConstructor getContainer(@NotNull Arguments args, @NotNull Cell cell) {
-
-    Editor editor = args.editor;
-    ResultConstructor found = this.findContainer(editor, cell);
+    ResultConstructor found = this.findContainer(editor, offset);
     if (found != null) {
 
       return found;
@@ -146,8 +71,7 @@ public class DatabaseInEditorResults {
       final Disposable parent = Disposer.newDisposable();
 
       BooleanFunction<EditorResultsContainer> aliveChecker = c -> this.getUncollectedResults().contains(c);
-      int lse = cell.lastStatementEnd;
-      EditorResultsContainer container = new EditorResultsContainer(parent, args.editor, args.title, aliveChecker, lse);
+      EditorResultsContainer container = new EditorResultsContainer(parent, (EditorEx) editor, aliveChecker, offset);
       final RunnerLayoutUi ui = container.getUi();
       ui.addListener(new ContentManagerListener() {
 
@@ -164,7 +88,7 @@ public class DatabaseInEditorResults {
       this.myContainers.putValue(editor, reference);
       EditorUtil.disposeWithEditor(editor, parent);
       Disposer.register(parent, () -> {
-        this.myContainers.remove(args.editor, reference);
+        this.myContainers.remove(editor, reference);
         EditorResultsContainer c = reference.get();
         if (c != null) {
           c.clearStrongReferences();
@@ -183,7 +107,7 @@ public class DatabaseInEditorResults {
   }
 
   @Nullable
-  private ResultConstructor findContainer(@NotNull Editor editor, @NotNull Cell cell) {
+  private ResultConstructor findContainer(@NotNull Editor editor, int offset) {
 
     Collection<ResultConstructor> containers = this.getUncollectedResults(editor);
     Iterator<ResultConstructor> iterator = containers.iterator();
@@ -195,7 +119,7 @@ public class DatabaseInEditorResults {
       }
 
       container = iterator.next();
-    } while (!container.isShown() || !cell.range.containsOffset(container.getOffset()));
+    } while (!container.isShown() || offset != container.getOffset());
 
     return container;
   }
@@ -205,13 +129,13 @@ public class DatabaseInEditorResults {
 
     List<ContainerWeakRef> refs = new ArrayList<>(this.myContainers.get(editor));
 
-    return ContainerUtil.filter(ContainerUtil.mapNotNull(refs, DatabaseInEditorResults::asResult), Result::isShown);
+    return ContainerUtil.filter(ContainerUtil.mapNotNull(refs, InEditorResultUi::asResult), Result::isShown);
   }
 
   @NotNull
   private Collection<ResultConstructor> getUncollectedResults() {
 
-    return ContainerUtil.mapNotNull(new ArrayList<>(this.myContainers.values()), DatabaseInEditorResults::asResult);
+    return ContainerUtil.mapNotNull(new ArrayList<>(this.myContainers.values()), InEditorResultUi::asResult);
   }
 
   @Nullable
@@ -386,7 +310,7 @@ public class DatabaseInEditorResults {
     }
   }
 
-  public static class EditorResultsContainer implements ResultConstructor {
+  private static class EditorResultsContainer implements ResultConstructor {
     private final Disposable myParent;
     private final BooleanFunction<EditorResultsContainer> myIsAlive;
     private final ContainerWeakRef myWeakRef;
@@ -400,17 +324,16 @@ public class DatabaseInEditorResults {
     private EditorResultsContainer.ParentDisposalController myParentController;
     private boolean myInProgress;
 
-    EditorResultsContainer(@NotNull Disposable parent, @NotNull EditorEx editor, @NotNull String title, @NotNull BooleanFunction<EditorResultsContainer> isAlive, int initialOffset) {
+    EditorResultsContainer(@NotNull Disposable parent, @NotNull EditorEx editor, @NotNull BooleanFunction<EditorResultsContainer> isAlive, int initialOffset) {
       this.myParent = parent;
       this.myEditor = editor;
       this.myIsAlive = isAlive;
       this.myInitialOffset = initialOffset;
       this.myLastScrollEvent = new AtomicLong();
       this.myScrollBarListener = new EditorResultsContainer.MyScrollBarListener(this.myLastScrollEvent);
-      this.myUi = Factory.getInstance(Objects.requireNonNull(editor.getProject())).create("not_persistent_id", title, title, parent);
+      this.myUi = Factory.getInstance(Objects.requireNonNull(editor.getProject())).create("not_persistent_id", "Results", "Results", parent);
       this.myUi.getDefaults().initTabDefaults(0, "not_persistent_id", (Icon) null);
       this.myUi.getOptions().setMoveToGridActionEnabled(false).setMinimizeActionEnabled(false);
-//          .setTabPopupActions((ActionGroup) ActionManager.getInstance().getAction("Console.TabPopupGroup.Embedded"));
       this.myShown = true;
       this.myWeakRef = new ContainerWeakRef(this, parent);
     }
@@ -508,14 +431,10 @@ public class DatabaseInEditorResults {
         JComponent component = this.myUi.getComponent();
         component.setBorder(new PanelBorder(this.myEditor));
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(component, "Center");
+        panel.add(component, BorderLayout.CENTER);
         JLayeredPane pane = new EditorResultsContainer.MyJLayeredPane();
-//        TableResultView resultView = UIUtil.uiTraverser(component).filter(TableResultView.class).first();
         if (this.myEditor instanceof EditorImpl) {
-//            && resultView != null) {
-//          int height = resultView.getRowHeight() * MAX_ROWS;
-          int height = 12 * MAX_ROWS;
-          pane.setPreferredSize(new Dimension(getEditorTextWidth((EditorImpl) this.myEditor) + 1, height));
+          pane.setPreferredSize(new Dimension(getEditorTextWidth((EditorImpl) this.myEditor) + 1, 100));
         }
 
         pane.add(panel);
@@ -524,7 +443,7 @@ public class DatabaseInEditorResults {
         pane.add(transparentPanel);
         pane.setLayer(transparentPanel, JLayeredPane.DEFAULT_LAYER + 1);
         int rowHeight = (int) ((double) this.myEditor.getLineHeight() * 0.35D);
-        panel.add(Box.createVerticalStrut(rowHeight), "North");
+        panel.add(Box.createVerticalStrut(rowHeight), BorderLayout.NORTH);
         panel.setOpaque(false);
         transparentPanel.addMouseWheelListener(new EditorResultsContainer.MyMouseWheelListener(transparentPanel, panel, this.myEditor, this.myLastScrollEvent));
         this.myEditor.getScrollPane().getVerticalScrollBar().addAdjustmentListener(this.myScrollBarListener);
@@ -549,7 +468,6 @@ public class DatabaseInEditorResults {
     @Override
     @NotNull
     public RunnerLayoutUi getUi() {
-
       return this.myUi;
     }
 
@@ -679,21 +597,6 @@ public class DatabaseInEditorResults {
         }
 
       }
-    }
-  }
-
-  public static class Arguments {
-
-    final EditorEx editor;
-    final PsiFile file;
-    final String title;
-    final TextRange range;
-
-    public Arguments(@NotNull String title, @NotNull EditorEx editor, @NotNull PsiFile file, @NotNull TextRange range) {
-      this.editor = editor;
-      this.file = file;
-      this.title = title;
-      this.range = range;
     }
   }
 

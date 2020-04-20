@@ -39,48 +39,48 @@
  *  org.jetbrains.annotations.NotNull
  *  org.jetbrains.annotations.Nullable
  */
-package com.github.xfslove.intellij.plugin.redis.experimental.script;
+package com.github.xfslove.intellij.plugin.redis.script;
 
 import com.github.xfslove.intellij.plugin.redis.lang.RedisCommand;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiElement;
 import com.intellij.util.containers.JBIterable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class CommandModel<E> extends ScriptModel<E> {
+public class CommandModel extends ScriptModel<PsiElement> {
 
-  private final Script<E> myScript;
+  private final Script<PsiElement> myScript;
 
   public CommandModel(@NotNull Editor editor) {
     this(newScriptFor(editor));
   }
 
-  private CommandModel(@NotNull Script<E> script) {
+  private CommandModel(@NotNull Script<PsiElement> script) {
     this.myScript = script;
   }
 
   @NotNull
-  private static <E> Script<E> newScriptFor(@NotNull Editor editor) {
-    return new TrackingDocScript<>(editor.getProject(), editor.getDocument());
+  private static Script<PsiElement> newScriptFor(@NotNull Editor editor) {
+    return new TrackingDocScript(editor.getProject(), editor.getDocument());
   }
 
-  public JBIterable<CommandIterator<E>> commands() {
+  public JBIterable<CommandIterator<PsiElement>> commands() {
     return statements()
         .filter(Conditions.compose(ModelIterator::object, Conditions.instanceOf(RedisCommand.class)));
   }
 
   @Override
-  public CommandModel<E> subModel(@Nullable TextRange range) {
-    return new CommandModel<>(this.myScript.subScript(range));
+  public CommandModel subModel(@Nullable TextRange range) {
+    return new CommandModel(this.myScript.subScript(range));
   }
 
   @Override
-  public JBIterable<CommandIterator<E>> statements() {
+  public JBIterable<CommandIterator<PsiElement>> statements() {
     return new CommandIterator<>(this.myScript.getScript()).cursor();
   }
 

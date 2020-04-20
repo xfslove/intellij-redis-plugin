@@ -16,6 +16,7 @@
         <!-- Add your extensions here -->
         <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.client.RedisClient"/>
         <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage"/>
+        <projectService serviceImplementation="com.github.xfslove.intellij.plugin.redis.ui.InEditorResultUi"/>
 
         <toolWindow id="redisExplorer" anchor="right" icon="/icon/redis.svg" factoryClass="com.github.xfslove.intellij.plugin.redis.ui.ExplorerPanelFactory"/>
 

@@ -1,4 +1,4 @@
-package com.github.xfslove.intellij.plugin.redis.experimental.script;
+package com.github.xfslove.intellij.plugin.redis.script;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;

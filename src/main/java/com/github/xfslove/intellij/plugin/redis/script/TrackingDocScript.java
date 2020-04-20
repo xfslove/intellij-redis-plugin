@@ -1,32 +1,33 @@
-package com.github.xfslove.intellij.plugin.redis.experimental.script;
+package com.github.xfslove.intellij.plugin.redis.script;
 
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.SyntaxTraverser;
 import org.jetbrains.annotations.Nullable;
 
-class TrackingDocScript<E> extends DocScript<E> {
+class TrackingDocScript extends DocScript<PsiElement> {
 
-  SealedDocScript<E> sealed;
+  SealedDocScript sealed;
 
   TrackingDocScript(Project project, Document document) {
     super(project, document, null);
   }
 
   @Override
-  public DocScript<E> subScript(@Nullable TextRange range) {
+  public DocScript<PsiElement> subScript(@Nullable TextRange range) {
     return this.getSealed().subScript(range);
   }
 
   @Override
-  public SyntaxTraverser<E> getScript() {
+  public SyntaxTraverser<PsiElement> getScript() {
     return this.getSealed().getScript();
   }
 
-  SealedDocScript<E> getSealed() {
+  SealedDocScript getSealed() {
     if (this.sealed == null || this.sealed.timeStamp != this.document.getModificationStamp()) {
-      this.sealed = new SealedDocScript<>(this.project, this.document);
+      this.sealed = new SealedDocScript(this.project, this.document);
     }
     return this.sealed;
   }

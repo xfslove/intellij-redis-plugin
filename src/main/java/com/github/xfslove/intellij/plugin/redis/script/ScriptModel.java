@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package com.github.xfslove.intellij.plugin.redis.experimental.script;
+package com.github.xfslove.intellij.plugin.redis.script;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.TextRange;
