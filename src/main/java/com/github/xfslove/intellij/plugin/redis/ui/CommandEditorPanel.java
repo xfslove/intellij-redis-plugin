@@ -1,7 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
 import com.github.xfslove.intellij.plugin.redis.action.SelectConnectionAction;
-import com.github.xfslove.intellij.plugin.redis.action.ExecCommandsAction;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
@@ -26,12 +25,10 @@ import java.awt.*;
 public class CommandEditorPanel extends EditorNotificationPanel {
 
   private final VirtualFile redisFile;
-  private HyperlinkLabel executeLabel;
   private HyperlinkLabel configureLabel;
 
   public CommandEditorPanel(@NotNull VirtualFile redisFile) {
     this.redisFile = redisFile;
-    createExecuteLabels();
     createConfigureLabels();
   }
 
@@ -66,19 +63,6 @@ public class CommandEditorPanel extends EditorNotificationPanel {
       return;
     }
 
-    HyperlinkLabel label = new HyperlinkLabel("Run Commands", getBackground());
-    label.addHyperlinkListener(new HyperlinkAdapter() {
-
-      @Override
-      protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction(new ExecCommandsAction());
-      }
-    });
-    label.setToolTipText("Run Commands");
-    label.setIcon(AllIcons.Actions.RunAll);
-    add(label);
-
-    executeLabel = label;
   }
 
   /**
@@ -109,10 +93,6 @@ public class CommandEditorPanel extends EditorNotificationPanel {
   @Override
   public IntentionActionWithOptions getIntentionAction() {
     return null;
-  }
-
-  public HyperlinkLabel getExecuteLabel() {
-    return executeLabel;
   }
 
   public HyperlinkLabel getConfigureLabel() {

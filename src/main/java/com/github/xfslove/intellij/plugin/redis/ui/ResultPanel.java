@@ -1,5 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
+import com.github.xfslove.intellij.plugin.redis.script.CommandIterator;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -21,8 +22,10 @@ public class ResultPanel extends JPanel {
   private JPanel resultPanel;
 
   private TreeTable resultTable;
+  private final CommandIterator command;
 
-  public ResultPanel() {
+  public ResultPanel(CommandIterator command) {
+    this.command = command;
 
     initResultPanel();
     initToolbarPanel();

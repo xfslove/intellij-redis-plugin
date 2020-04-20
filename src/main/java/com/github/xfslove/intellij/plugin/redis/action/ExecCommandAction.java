@@ -50,20 +50,13 @@ public class ExecCommandAction extends DumbAwareAction {
     CommandModel subModel = model.subModel(textRange);
     CommandIterator command = subModel.statements().first();
 
-
-    System.out.println(command.text());
-    System.out.println(command.range());
-    System.out.println(command.key());
-
-    System.out.println("==========================");
-
-//    ResultPanel panel = new ResultPanel();
-//    RunnerLayoutUi ui = result.getUi();
-//    Content content = ui.createContent("resultPanel#" + element.getTextOffset(), new ComponentWithActions.Impl(panel.getRootPanel()), "", null, panel.getResultPanel());
-//    content.setCloseable(true);
-//    content.setPinnable(true);
-//    ui.addContent(content);
-//    result.show();
+    ResultPanel panel = new ResultPanel(command);
+    RunnerLayoutUi ui = result.getUi();
+    Content content = ui.createContent("resultPanel#" + endOffset, new ComponentWithActions.Impl(panel.getRootPanel()), "", null, panel.getResultPanel());
+    content.setCloseable(true);
+    content.setPinnable(true);
+    ui.addContent(content);
+    result.show();
 
     result.setInProgress(false);
   }
