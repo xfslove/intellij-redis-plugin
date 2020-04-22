@@ -1,5 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
+import com.github.xfslove.intellij.plugin.redis.action.SelectModuleAction;
 import com.github.xfslove.intellij.plugin.redis.script.CommandIterator;
 import com.intellij.ide.CommonActionsManager;
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -44,6 +45,7 @@ public class ResultPanel extends JPanel {
     CommonActionsManager actionsManager = CommonActionsManager.getInstance();
 
     DefaultActionGroup actionGroup = new DefaultActionGroup("ActionsGroup", false);
+    actionGroup.add(new SelectModuleAction());
     actionGroup.add(new Separator());
 
     JComponent actionToolbar = ActionManager.getInstance().createActionToolbar("Actions", actionGroup, true).getComponent();

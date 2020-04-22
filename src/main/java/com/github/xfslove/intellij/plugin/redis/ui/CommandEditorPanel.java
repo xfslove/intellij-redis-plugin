@@ -56,14 +56,6 @@ public class CommandEditorPanel extends EditorNotificationPanel {
     configureLabel = label;
   }
 
-  private void createExecuteLabels() {
-    Connection selectedConnection = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
-
-    if (selectedConnection == null) {
-      return;
-    }
-
-  }
 
   /**
    *   implement super.executeAction(actionId).

@@ -75,12 +75,28 @@ public class InEditorResultUi {
       final RunnerLayoutUi ui = container.getUi();
       ui.addListener(new ContentManagerListener() {
 
+
+        @Override
+        public void contentAdded(@NotNull ContentManagerEvent event) {
+          
+        }
+
         @Override
         public void contentRemoved(@NotNull ContentManagerEvent event) {
 
           if (ui.getContents().length == 0) {
             Disposer.dispose(parent);
           }
+
+        }
+
+        @Override
+        public void contentRemoveQuery(@NotNull ContentManagerEvent event) {
+
+        }
+
+        @Override
+        public void selectionChanged(@NotNull ContentManagerEvent event) {
 
         }
       }, parent);
@@ -449,8 +465,10 @@ public class InEditorResultUi {
         this.myEditor.getScrollPane().getVerticalScrollBar().addAdjustmentListener(this.myScrollBarListener);
         int leOffset = getLineEnd(this.myEditor, this.myInitialOffset);
         Properties properties = new Properties(
-            ResizePolicy.any(), r -> new CloseRenderer(this, rowHeight), true, false, 0, leOffset);
-        Inlay<?> inlay = Objects.requireNonNull(EditorEmbeddedComponentManager.getInstance().addComponent(this.myEditor, pane, properties));
+            ResizePolicy.any(),
+//            r -> new CloseRenderer(this, rowHeight),
+            true, false, 0, leOffset);
+        Inlay<?> inlay = (Inlay<?>) Objects.requireNonNull(EditorEmbeddedComponentManager.getInstance().addComponent(this.myEditor, pane, properties));
         this.setInlay(inlay);
       }
     }
