@@ -8,14 +8,15 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.CompilerModuleExtension;
+import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiMethod;
 import com.intellij.util.lang.UrlClassLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -39,24 +40,22 @@ public class SelectModuleAction extends DumbAwareAction {
 
     for (Module module : modules) {
 
+      if (!"module2".equals(module.getName())) {
+        continue;
+      }
+
       JavaRunConfigurationModule configurationModule = new JavaRunConfigurationModule(project, false);
       configurationModule.setModule(module);
 
-      PsiClass aClass = configurationModule.findClass("A");
-      PsiMethod[] constructors = aClass.getConstructors();
+      PsiClass psiClass = configurationModule.findClass("two.test.B");
 
       CompilerManager.getInstance(module.getProject())
           .compile(module, (aborted, errors, warnings, compileContext) -> {
 
             if (!aborted && errors == 0) {
-              String outputUrl = CompilerModuleExtension.getInstance(module).getCompilerOutputUrl();
-              System.out.println(outputUrl);
+              List<String> list = OrderEnumerator.orderEntries(module).recursively().compileOnly().getPathsList().getPathList();
 
-              final List<String> list = new ArrayList<>();
-//                OrderEnumerator.orderEntries(module).recursively().runtimeOnly().getPathsList().getPathList();
-              list.add(outputUrl);
-
-              final List<URL> urls = new ArrayList<>();
+              List<URL> urls = new ArrayList<>();
               for (String path : list) {
                 try {
                   urls.add(new File(FileUtil.toSystemIndependentName(path)).toURI().toURL());
@@ -68,18 +67,22 @@ public class SelectModuleAction extends DumbAwareAction {
               UrlClassLoader loader = UrlClassLoader.build().parent(ClassLoader.getSystemClassLoader()).urls(urls).get();
 
               try {
-                Class<?> a = loader.loadClass(aClass.getQualifiedName());
+                Class<?> a = loader.loadClass(psiClass.getQualifiedName());
+                Method setA = a.getMethod("setA", String.class);
+                Method setB = a.getMethod("setB", String.class);
 
-              } catch (ClassNotFoundException classNotFoundException) {
-                classNotFoundException.printStackTrace();
+                Object o = a.newInstance();
+                setA.invoke(o, "a");
+                setB.invoke(o, "b");
+
+                System.out.println(o.toString());
+
+              } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException ex) {
+                ex.printStackTrace();
               }
             }
 
           });
-
-//      Class<?> a = generateAndShowXml(module, "A");
-
-//      System.out.println(a.toString());
 
 
     }
