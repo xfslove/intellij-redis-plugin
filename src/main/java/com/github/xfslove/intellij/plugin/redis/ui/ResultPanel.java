@@ -6,10 +6,14 @@ import com.intellij.ide.CommonActionsManager;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Separator;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.treeStructure.treetable.TreeTable;
+import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 /**
@@ -22,7 +26,7 @@ public class ResultPanel extends JPanel {
   private JPanel toolbarPanel;
   private JPanel resultPanel;
 
-  private TreeTable resultTable;
+  private JTextArea resultArea;
   private final CommandIterator command;
 
   public ResultPanel(CommandIterator command) {
@@ -36,7 +40,17 @@ public class ResultPanel extends JPanel {
 
   private void initResultPanel() {
 
-    resultPanel.add(new JBScrollPane(resultTable), BorderLayout.CENTER);
+    resultArea = new JTextArea();
+    resultArea.setBorder(UIUtil.getTextFieldBorder());
+    resultArea.setBackground(UIUtil.getTextFieldBackground());
+    resultArea.setEditable(false);
+    resultPanel.add(new JBScrollPane(resultArea), BorderLayout.CENTER);
+
+    resultArea.append("> test");
+    resultArea.append("\n");
+    resultArea.append("> test");
+    resultArea.append("\n");
+    resultArea.append("> test");
 
   }
 
@@ -59,5 +73,9 @@ public class ResultPanel extends JPanel {
 
   public JPanel getResultPanel() {
     return resultPanel;
+  }
+
+  public JTextArea getResultArea() {
+    return resultArea;
   }
 }
