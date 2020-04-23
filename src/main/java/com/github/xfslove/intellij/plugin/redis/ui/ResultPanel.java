@@ -8,6 +8,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.Separator;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.colors.EditorFontType;
+import com.intellij.openapi.editor.colors.FontPreferences;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.ui.UIUtil;
@@ -41,6 +43,7 @@ public class ResultPanel extends JPanel {
   private void initResultPanel() {
 
     resultArea = new JTextArea();
+    resultArea.setFont(EditorColorsManager.getInstance().getSchemeForCurrentUITheme().getFont(EditorFontType.BOLD));
     resultArea.setBorder(UIUtil.getTextFieldBorder());
     resultArea.setBackground(UIUtil.getTextFieldBackground());
     resultArea.setEditable(false);
