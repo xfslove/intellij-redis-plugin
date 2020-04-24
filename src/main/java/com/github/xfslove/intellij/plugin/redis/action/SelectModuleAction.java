@@ -1,9 +1,13 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
+import com.github.xfslove.intellij.plugin.redis.client.RedisClient;
+import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
 import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.compiler.CompilerManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -12,15 +16,19 @@ import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.PsiClass;
 import com.intellij.util.lang.UrlClassLoader;
+import io.lettuce.core.api.async.RedisStringAsyncCommands;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author wongiven
@@ -40,14 +48,14 @@ public class SelectModuleAction extends DumbAwareAction {
 
     for (Module module : modules) {
 
-      if (!"module2".equals(module.getName())) {
+      if (!"demo".equals(module.getName())) {
         continue;
       }
 
-      JavaRunConfigurationModule configurationModule = new JavaRunConfigurationModule(project, false);
-      configurationModule.setModule(module);
-
-      PsiClass psiClass = configurationModule.findClass("two.test.B");
+//      JavaRunConfigurationModule configurationModule = new JavaRunConfigurationModule(project, false);
+//      configurationModule.setModule(module);
+//
+//      PsiClass psiClass = configurationModule.findClass("com.example.demo.B");
 
       CompilerManager.getInstance(module.getProject())
           .compile(module, (aborted, errors, warnings, compileContext) -> {
@@ -66,20 +74,31 @@ public class SelectModuleAction extends DumbAwareAction {
 
               UrlClassLoader loader = UrlClassLoader.build().parent(ClassLoader.getSystemClassLoader()).urls(urls).get();
 
+              JdkSerializationRedisSerializer serializer = new JdkSerializationRedisSerializer(loader);
+
+              RedisClient client = ServiceManager.getService(project, RedisClient.class);
+
+              ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+
+              Connection connection = storage.getConnections().get(0);
+
+              RedisStringAsyncCommands<byte[], byte[]> commands = client.getCommands(connection);
+
+              String key = "test";
               try {
-                Class<?> a = loader.loadClass(psiClass.getQualifiedName());
-                Method setA = a.getMethod("setA", String.class);
-                Method setB = a.getMethod("setB", String.class);
+                byte[] result = commands.get(key.getBytes(StandardCharsets.UTF_8)).get();
 
-                Object o = a.newInstance();
-                setA.invoke(o, "a");
-                setB.invoke(o, "b");
+                Object o = serializer.deserialize(result);
 
-                System.out.println(o.toString());
+                System.out.println(o);
 
-              } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException ex) {
-                ex.printStackTrace();
+              } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+              } catch (ExecutionException executionException) {
+                executionException.printStackTrace();
               }
+
+
             }
 
           });
