@@ -23,7 +23,7 @@ public class RedisClient {
   }
 
   public RedisClusterAsyncCommands<byte[], byte[]> getCommands(Connection connection) {
-//    if (connection.isCluster()) {
+    if (connection.isCluster()) {
 
       String[] urls = connection.getUrl().split(",");
       String password = connection.retrievePassword();
@@ -38,17 +38,17 @@ public class RedisClient {
       }).collect(Collectors.toList());
 
       return RedisClusterClient.create(uriList).connect(new ByteArrayCodec()).async();
-//    } else {
-//      String[] hp = connection.getUrl().split(":");
-//      String password = connection.retrievePassword();
-//
-//      RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
-//      if (StringUtils.isNotBlank(password)) {
-//        uri.setPassword(password);
-//      }
-//
-//      return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec()).async();
-//    }
+    } else {
+      String[] hp = connection.getUrl().split(":");
+      String password = connection.retrievePassword();
+
+      RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
+      if (StringUtils.isNotBlank(password)) {
+        uri.setPassword(password);
+      }
+
+      return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec()).async();
+    }
 
   }
 }

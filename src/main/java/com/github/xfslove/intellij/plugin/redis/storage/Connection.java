@@ -19,9 +19,18 @@ public class Connection implements Cloneable {
   private boolean savePassword;
 
   private String oneTimePassword;
+  private boolean cluster;
+
+  public String getUniName() {
+    return name + "/" + url;
+  }
 
   public boolean isCluster() {
-    return url.split(",").length > 1;
+    return cluster;
+  }
+
+  public void setCluster(boolean cluster) {
+    this.cluster = cluster;
   }
 
   public String getUrl() {
@@ -57,7 +66,7 @@ public class Connection implements Cloneable {
       return;
     }
     CredentialAttributes credentialAttributes =
-        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", url));
+        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", getUniName()));
     PasswordSafe.getInstance().set(credentialAttributes, null);
   }
 
@@ -66,14 +75,14 @@ public class Connection implements Cloneable {
       return;
     }
     CredentialAttributes credentialAttributes =
-        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", url));
+        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", getUniName()));
     Credentials credentials = new Credentials(url, oneTimePassword);
     PasswordSafe.getInstance().set(credentialAttributes, credentials);
   }
 
   public String retrievePasswordFromOs() {
     CredentialAttributes credentialAttributes =
-        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", url));
+        new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", getUniName()));
     Credentials credentials = PasswordSafe.getInstance().get(credentialAttributes);
     if (credentials != null) {
       return PasswordSafe.getInstance().getPassword(credentialAttributes);

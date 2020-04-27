@@ -26,6 +26,7 @@ public class ConfigurationPanel extends JPanel {
   private JTextField urlField;
   private JPasswordField passwordField;
   private JCheckBox savePasswordCheckBox;
+  private JCheckBox clusterCheckBox;
 
   private final Project project;
 
@@ -94,6 +95,14 @@ public class ConfigurationPanel extends JPanel {
     }
   }
 
+  private boolean isClusterCheckBoxSelected() {
+    return clusterCheckBox.isSelected();
+  }
+
+  private void setClusterCheckBoxSelect(boolean select) {
+    clusterCheckBox.setSelected(select);
+  }
+
   private boolean isSavePasswordCheckBoxSelected() {
     return savePasswordCheckBox.isSelected();
   }
@@ -111,12 +120,33 @@ public class ConfigurationPanel extends JPanel {
   }
 
   public ValidationInfo doValidate() {
-    if (StringUtils.isBlank(nameField.getText())) {
+
+    if (StringUtils.isBlank(getNameField())) {
       return new ValidationInfo("name can not be null");
     }
-    if (StringUtils.isBlank(urlField.getText())) {
+    String urlField = getUrlField();
+    if (StringUtils.isBlank(urlField)) {
       return new ValidationInfo("url can not be null");
     }
+
+    if (isClusterCheckBoxSelected()) {
+
+      String[] nodes = urlField.split(";");
+      for (String node : nodes) {
+        String[] hp = node.split(":");
+        if (hp.length != 2) {
+          return new ValidationInfo("url must be host:port1;host:port2;...");
+        }
+      }
+
+    } else {
+
+      String[] hp = urlField.split(":");
+      if (hp.length != 2) {
+        return new ValidationInfo("url must be host:port");
+      }
+    }
+
     return null;
   }
 
@@ -124,11 +154,13 @@ public class ConfigurationPanel extends JPanel {
     connection.setName(getNameField());
     connection.setUrl(getUrlField());
     connection.setSavePassword(isSavePasswordCheckBoxSelected());
+    connection.setCluster(isClusterCheckBoxSelected());
   }
 
   public void load(Connection connection) {
     setNameField(connection.getName());
     setUrlField(connection.getUrl());
     setSavePasswordCheckBoxSelect(connection.isSavePassword());
+    setClusterCheckBoxSelect(connection.isCluster());
   }
 }
