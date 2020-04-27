@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.action.SelectConnectionAction;
+import com.github.xfslove.intellij.plugin.redis.action.SelectConnectionPopupAction;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.codeInsight.intention.IntentionActionWithOptions;
 import com.intellij.icons.AllIcons;
@@ -25,7 +25,6 @@ import java.awt.*;
 public class CommandEditorPanel extends EditorNotificationPanel {
 
   private final VirtualFile redisFile;
-  private HyperlinkLabel configureLabel;
 
   public CommandEditorPanel(@NotNull VirtualFile redisFile) {
     this.redisFile = redisFile;
@@ -46,14 +45,12 @@ public class CommandEditorPanel extends EditorNotificationPanel {
 
       @Override
       protected void hyperlinkActivated(HyperlinkEvent e) {
-        CommandEditorPanel.this.executeAction(new SelectConnectionAction());
+        CommandEditorPanel.this.executeAction(new SelectConnectionPopupAction(label));
       }
     });
     label.setToolTipText("Select Connection");
     label.setIcon(AllIcons.General.Settings);
     myLinksPanel.add(label);
-
-    configureLabel = label;
   }
 
 
@@ -87,7 +84,4 @@ public class CommandEditorPanel extends EditorNotificationPanel {
     return null;
   }
 
-  public HyperlinkLabel getConfigureLabel() {
-    return configureLabel;
-  }
 }

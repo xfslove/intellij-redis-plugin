@@ -20,11 +20,11 @@ import java.io.IOException;
  * @author wongiven
  * @date created at 2020/3/27
  */
-public class CommandEditorAction extends DumbAwareAction {
+public class OpenCommandEditorAction extends DumbAwareAction {
 
   private final ExplorerPanel explorerPanel;
 
-  public CommandEditorAction(ExplorerPanel explorerPanel) {
+  public OpenCommandEditorAction(ExplorerPanel explorerPanel) {
     super("Command Editor", "Command editor", AllIcons.Actions.Execute);
     this.explorerPanel = explorerPanel;
   }

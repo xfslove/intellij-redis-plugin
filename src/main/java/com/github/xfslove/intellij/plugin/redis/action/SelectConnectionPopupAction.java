@@ -15,44 +15,47 @@ import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.ui.popup.PopupStep;
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.EditorNotifications;
 import com.intellij.ui.HyperlinkLabel;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author wongiven
  * @date created at 2020/4/9
  */
-public class SelectConnectionAction extends DumbAwareAction {
+public class SelectConnectionPopupAction extends DumbAwareAction {
 
-  private final Connection hold;
+  private final HyperlinkLabel configureLabel;
 
-  public SelectConnectionAction(Connection hold) {
-    super("Connections");
-    this.hold = hold;
+  public SelectConnectionPopupAction(HyperlinkLabel configureLabel) {
+    super("Select Connection");
+    this.configureLabel = configureLabel;
   }
 
   @Override
   public void actionPerformed(@NotNull AnActionEvent e) {
+
     Project project = e.getProject();
-    VirtualFile redisFile = e.getRequiredData(CommonDataKeys.VIRTUAL_FILE);
-    PsiFile psiFile = e.getRequiredData(CommonDataKeys.PSI_FILE);
-    redisFile.putUserData(ExplorerPanel.SELECTED_CONFIG, hold);
-     /*
-       notification editor update
-       1. editor notification
-       2. line marker
-       another way:
-       psiDocumentManager.reparseFiles
-     */
-    EditorNotifications.getInstance(project).updateNotifications(redisFile);
-    DaemonCodeAnalyzer.getInstance(project).restart(psiFile);
+    ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
+    List<Connection> connectionList = storage.getConnections();
+
+    Map<String, AnAction> actionName2action =
+        connectionList.stream().collect(Collectors.toMap(Connection::getName, SelectConnectionAction::new));
+
+    ListPopup runActionsPopup = JBPopupFactory.getInstance().createListPopup(
+        new BaseListPopupStep<String>("Connections", new ArrayList<>(actionName2action.keySet())) {
+          @Override
+          public PopupStep<?> onChosen(String selectedValue, boolean finalChoice) {
+            return this.doFinalStep(() -> (actionName2action.get(selectedValue)).actionPerformed(e));
+          }
+        });
+
+    runActionsPopup.showUnderneathOf(configureLabel);
 
   }
 }

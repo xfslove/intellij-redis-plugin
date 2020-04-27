@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.action.CommandEditorAction;
+import com.github.xfslove.intellij.plugin.redis.action.OpenCommandEditorAction;
 import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
@@ -67,7 +67,7 @@ public class ExplorerPanel extends JPanel {
     actionGroup.add(new DeleteConnectionAction(this));
     actionGroup.add(new EditConnectionAction(this));
     actionGroup.add(new Separator());
-    actionGroup.add(new CommandEditorAction(this));
+    actionGroup.add(new OpenCommandEditorAction(this));
     actionGroup.add(new Separator());
     actionGroup.add(actionsManager.createExpandAllAction(redisServersExpander, rootPanel));
     actionGroup.add(actionsManager.createCollapseAllAction(redisServersExpander, rootPanel));
