@@ -1,54 +1,69 @@
 package com.github.xfslove.intellij.plugin.redis.client;
 
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.intellij.openapi.util.Disposer;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.async.RedisStringAsyncCommands;
-import io.lettuce.core.cluster.RedisClusterClient;
-import io.lettuce.core.cluster.api.async.RedisClusterAsyncCommands;
+import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.support.ConnectionPoolSupport;
 import org.apache.commons.lang.StringUtils;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 /**
  * @author wongiven
- * @date created at 2020/3/26
+ * @date created at 2020/5/8
  */
 public class RedisClient {
 
-  public void connect(Connection connection) {
-    RedisClusterAsyncCommands<byte[], byte[]> commands = getCommands(connection);
+  protected final Connection connection;
+
+  private final GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool;
+
+  public RedisClient(Connection connection) {
+    this.connection = connection;
+    pool = createPool();
   }
 
-  public RedisClusterAsyncCommands<byte[], byte[]> getCommands(Connection connection) {
-    if (connection.isCluster()) {
+  private GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> createPool() {
+    GenericObjectPoolConfig<StatefulRedisConnection<byte[], byte[]>> config = new GenericObjectPoolConfig<>();
+    config.setMaxTotal(5);
+    config.setMaxIdle(1);
+    config.setMinIdle(1);
+    GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool = ConnectionPoolSupport.createGenericObjectPool(
+        () -> {
+          String[] hp = connection.getUrl().split(":");
+          String password = connection.retrievePassword();
 
-      String[] urls = connection.getUrl().split(",");
-      String password = connection.retrievePassword();
+          RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
+          if (StringUtils.isNotBlank(password)) {
+            uri.setPassword(password);
+          }
+          return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec());
+        },
+        config
+    );
+    Disposer.register(Disposer.newDisposable(), pool::close);
+    return pool;
+  }
 
-      List<RedisURI> uriList = Arrays.stream(urls).map(url -> {
-        String[] hp = url.split(":");
-        RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
-        if (StringUtils.isNotBlank(password)) {
-          uri.setPassword(password);
-        }
-        return uri;
-      }).collect(Collectors.toList());
-
-      return RedisClusterClient.create(uriList).connect(new ByteArrayCodec()).async();
-    } else {
-      String[] hp = connection.getUrl().split(":");
-      String password = connection.retrievePassword();
-
-      RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
-      if (StringUtils.isNotBlank(password)) {
-        uri.setPassword(password);
-      }
-
-      return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec()).async();
+  public byte[] get(byte[] key) throws Exception {
+    StatefulRedisConnection<byte[], byte[]> c = null;
+    try {
+      c = pool.borrowObject();
+      return c.sync().get(key);
+    } finally {
+      if (c != null) { pool.returnObject(c); }
     }
+  }
 
+  public boolean test() throws Exception {
+    StatefulRedisConnection<byte[], byte[]> c = null;
+    try {
+      c = pool.borrowObject();
+      return "PONG".equals(c.sync().ping());
+    } finally {
+      if (c != null) { pool.returnObject(c); }
+    }
   }
 }

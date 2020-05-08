@@ -107,13 +107,13 @@ public class Connection implements Cloneable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Connection that = (Connection) o;
-    return savePassword == that.savePassword &&
+    return cluster == that.cluster &&
         name.equals(that.name) &&
         url.equals(that.url);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, url, savePassword);
+    return Objects.hash(name, url, cluster);
   }
 }

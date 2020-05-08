@@ -1,9 +1,9 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
 import com.github.xfslove.intellij.plugin.redis.client.RedisClient;
+import com.github.xfslove.intellij.plugin.redis.client.RedisConnectionHolder;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
-import com.intellij.execution.configurations.JavaRunConfigurationModule;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.compiler.CompilerManager;
@@ -14,15 +14,12 @@ import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.OrderEnumerator;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.psi.PsiClass;
 import com.intellij.util.lang.UrlClassLoader;
 import io.lettuce.core.api.async.RedisStringAsyncCommands;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -76,17 +73,17 @@ public class SelectModuleAction extends DumbAwareAction {
 
               JdkSerializationRedisSerializer serializer = new JdkSerializationRedisSerializer(loader);
 
-              RedisClient client = ServiceManager.getService(project, RedisClient.class);
+              RedisConnectionHolder client = ServiceManager.getService(project, RedisConnectionHolder.class);
 
               ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
 
               Connection connection = storage.getConnections().get(0);
 
-              RedisStringAsyncCommands<byte[], byte[]> commands = client.getCommands(connection);
+              RedisClient redisClient = client.getClient(connection);
 
               String key = "test";
               try {
-                byte[] result = commands.get(key.getBytes(StandardCharsets.UTF_8)).get();
+                byte[] result = redisClient.get(key.getBytes(StandardCharsets.UTF_8));
 
                 Object o = serializer.deserialize(result);
 
@@ -96,6 +93,8 @@ public class SelectModuleAction extends DumbAwareAction {
                 interruptedException.printStackTrace();
               } catch (ExecutionException executionException) {
                 executionException.printStackTrace();
+              } catch (Exception exception) {
+                exception.printStackTrace();
               }
 
 

@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.client.RedisClient;
+import com.github.xfslove.intellij.plugin.redis.client.RedisConnectionHolder;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -52,8 +52,10 @@ public class ConfigurationPanel extends JPanel {
           progressIndicator.setText("Connecting to " + connection.getUrl());
         }
         try {
-          RedisClient redisClient = ServiceManager.getService(project, RedisClient.class);
-          redisClient.connect(connection);
+          RedisConnectionHolder redisClient = ServiceManager.getService(project, RedisConnectionHolder.class);
+          if (!redisClient.getClient(connection).test()) {
+            excRef.set(new Exception("ping failure"));
+          }
         } catch (Exception ex) {
           excRef.set(ex);
         }
