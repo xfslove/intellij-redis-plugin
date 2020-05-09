@@ -1,9 +1,10 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.action.NewRedisScratchAction;
 import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
+import com.github.xfslove.intellij.plugin.redis.action.NewRedisScratchAction;
+import com.github.xfslove.intellij.plugin.redis.client.RedisClientHolder;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.github.xfslove.intellij.plugin.redis.storage.ConnectionStorage;
 import com.intellij.ide.CommonActionsManager;
@@ -142,6 +143,7 @@ public class ExplorerPanel extends JPanel {
     selectedConnection.removePasswordFromOs();
     ConnectionStorage storage = ServiceManager.getService(project, ConnectionStorage.class);
     storage.getConnections().remove(selectedConnection);
+    RedisClientHolder.removeClient(selectedConnection);
 
     // render
     DefaultTreeModel model = (DefaultTreeModel) redisServersTree.getModel();
@@ -167,9 +169,11 @@ public class ExplorerPanel extends JPanel {
     redisServersTree.invalidate();
 
     // update (source -> target)
-    target.removePasswordFromOs();
-    source.storePasswordToOs();
     int targetIndex = storage.getConnections().indexOf(target);
+    target.removePasswordFromOs();
+    RedisClientHolder.removeClient(target);
+
+    source.storePasswordToOs();
     storage.getConnections().set(targetIndex, source);
 
     // render

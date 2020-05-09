@@ -18,7 +18,7 @@ public class Connection implements Cloneable {
   private String url;
   private boolean savePassword;
 
-  private String oneTimePassword;
+  private String passwordCache;
   private boolean cluster;
 
   public String getUniName() {
@@ -57,12 +57,16 @@ public class Connection implements Cloneable {
     this.savePassword = savePassword;
   }
 
-  public void oneTimePassword(String oneTimePassword) {
-    this.oneTimePassword = oneTimePassword;
+  public void storePasswordCache(String passwordCache) {
+    this.passwordCache = passwordCache;
+  }
+
+  public String retrievePasswordCache() {
+    return passwordCache;
   }
 
   public void removePasswordFromOs() {
-    if (!savePassword) {
+    if (!isSavePassword()) {
       return;
     }
     CredentialAttributes credentialAttributes =
@@ -71,12 +75,12 @@ public class Connection implements Cloneable {
   }
 
   public void storePasswordToOs() {
-    if (!savePassword) {
+    if (!isSavePassword()) {
       return;
     }
     CredentialAttributes credentialAttributes =
         new CredentialAttributes(CredentialAttributesKt.generateServiceName("redis-connections", getUniName()));
-    Credentials credentials = new Credentials(url, oneTimePassword);
+    Credentials credentials = new Credentials(url, passwordCache);
     PasswordSafe.getInstance().set(credentialAttributes, credentials);
   }
 
@@ -92,12 +96,13 @@ public class Connection implements Cloneable {
 
   public String retrievePassword() {
 
-    if (!savePassword) {
-      return oneTimePassword;
+    String passwordCache = retrievePasswordCache();
+    if (!isSavePassword()) {
+      return passwordCache;
     }
 
-    if (StringUtils.isNotBlank(oneTimePassword)) {
-      return oneTimePassword;
+    if (StringUtils.isNotBlank(passwordCache)) {
+      return passwordCache;
     }
     return retrievePasswordFromOs();
   }
@@ -107,13 +112,15 @@ public class Connection implements Cloneable {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Connection that = (Connection) o;
-    return cluster == that.cluster &&
+    return savePassword == that.savePassword &&
+        cluster == that.cluster &&
         name.equals(that.name) &&
-        url.equals(that.url);
+        url.equals(that.url) &&
+        Objects.equals(passwordCache, that.passwordCache);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, url, cluster);
+    return Objects.hash(name, url, savePassword, passwordCache, cluster);
   }
 }

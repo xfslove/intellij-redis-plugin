@@ -1,6 +1,7 @@
 package com.github.xfslove.intellij.plugin.redis.client;
 
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.util.Disposer;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -14,56 +15,64 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
  * @author wongiven
  * @date created at 2020/5/8
  */
-public class RedisClient {
+public class RedisClient implements Disposable {
 
   protected final Connection connection;
 
-  private final GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool;
+  private GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool;
 
   public RedisClient(Connection connection) {
     this.connection = connection;
-    pool = createPool();
   }
 
-  private GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> createPool() {
-    GenericObjectPoolConfig<StatefulRedisConnection<byte[], byte[]>> config = new GenericObjectPoolConfig<>();
-    config.setMaxTotal(5);
-    config.setMaxIdle(1);
-    config.setMinIdle(1);
-    GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool = ConnectionPoolSupport.createGenericObjectPool(
-        () -> {
-          String[] hp = connection.getUrl().split(":");
-          String password = connection.retrievePassword();
-
-          RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
-          if (StringUtils.isNotBlank(password)) {
-            uri.setPassword(password);
-          }
-          return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec());
-        },
-        config
-    );
-    Disposer.register(Disposer.newDisposable(), pool::close);
-    return pool;
+  public boolean test() throws Exception {
+    StatefulRedisConnection<byte[], byte[]> c = createLettuceConnection(connection);
+    return "PONG".equals(c.sync().ping());
   }
 
   public byte[] get(byte[] key) throws Exception {
     StatefulRedisConnection<byte[], byte[]> c = null;
     try {
-      c = pool.borrowObject();
+      c = getPool().borrowObject();
       return c.sync().get(key);
     } finally {
-      if (c != null) { pool.returnObject(c); }
+      if (c != null) { getPool().returnObject(c); }
     }
   }
 
-  public boolean test() throws Exception {
-    StatefulRedisConnection<byte[], byte[]> c = null;
-    try {
-      c = pool.borrowObject();
-      return "PONG".equals(c.sync().ping());
-    } finally {
-      if (c != null) { pool.returnObject(c); }
+  private GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> getPool() {
+    if (this.pool != null) {
+      return this.pool;
+    }
+
+    GenericObjectPoolConfig<StatefulRedisConnection<byte[], byte[]>> config = new GenericObjectPoolConfig<>();
+    config.setMaxTotal(5);
+    config.setMaxIdle(1);
+    config.setMinIdle(1);
+    GenericObjectPool<StatefulRedisConnection<byte[], byte[]>> pool = ConnectionPoolSupport.createGenericObjectPool(
+        () -> createLettuceConnection(connection),
+        config
+    );
+    Disposer.register(Disposer.newDisposable(), this);
+    this.pool = pool;
+    return this.pool;
+  }
+
+  private StatefulRedisConnection<byte[], byte[]> createLettuceConnection(Connection connection) {
+    String[] hp = connection.getUrl().split(":");
+    String password = connection.retrievePassword();
+
+    RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
+    if (StringUtils.isNotBlank(password)) {
+      uri.setPassword(password);
+    }
+    return io.lettuce.core.RedisClient.create(uri).connect(new ByteArrayCodec());
+  }
+
+  @Override
+  public void dispose() {
+    if (pool != null) {
+      pool.close();
     }
   }
 }

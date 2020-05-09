@@ -32,6 +32,13 @@ public class EditConnectionAction extends DumbAwareAction {
     clone.setName(connection.getName());
     clone.setUrl(connection.getUrl());
     clone.setSavePassword(connection.isSavePassword());
+    clone.setCluster(connection.isCluster());
+
+    if (connection.isSavePassword()) {
+      clone.storePasswordCache(connection.retrievePassword());
+    } else {
+      clone.storePasswordCache(connection.retrievePasswordCache());
+    }
 
     ConfigurationDialog dialog = new ConfigurationDialog(explorerPanel, project, clone);
     dialog.show();

@@ -466,7 +466,7 @@ public class InEditorResultUi {
         int leOffset = getLineEnd(this.myEditor, this.myInitialOffset);
         Properties properties = new Properties(
             ResizePolicy.any(),
-            r -> new CloseRenderer(this, rowHeight),
+//            r -> new CloseRenderer(this, rowHeight),
             true, false, 0, leOffset);
         Inlay<?> inlay = (Inlay<?>) Objects.requireNonNull(EditorEmbeddedComponentManager.getInstance().addComponent(this.myEditor, pane, properties));
         this.setInlay(inlay);

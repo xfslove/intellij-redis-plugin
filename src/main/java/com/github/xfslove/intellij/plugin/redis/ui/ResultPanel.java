@@ -49,12 +49,6 @@ public class ResultPanel extends JPanel {
     resultArea.setEditable(false);
     resultPanel.add(new JBScrollPane(resultArea), BorderLayout.CENTER);
 
-    resultArea.append("> test");
-    resultArea.append("\n");
-    resultArea.append("> test");
-    resultArea.append("\n");
-    resultArea.append("> test");
-
   }
 
   private void initToolbarPanel() {
@@ -62,7 +56,7 @@ public class ResultPanel extends JPanel {
     CommonActionsManager actionsManager = CommonActionsManager.getInstance();
 
     DefaultActionGroup actionGroup = new DefaultActionGroup("ActionsGroup", false);
-    actionGroup.add(new SelectModuleAction());
+    actionGroup.add(new SelectModuleAction(this));
     actionGroup.add(new Separator());
 
     JComponent actionToolbar = ActionManager.getInstance().createActionToolbar("Actions", actionGroup, true).getComponent();

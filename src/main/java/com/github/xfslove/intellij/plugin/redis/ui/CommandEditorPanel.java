@@ -26,6 +26,8 @@ public class CommandEditorPanel extends EditorNotificationPanel {
 
   private final VirtualFile redisFile;
 
+  // todo update notification when update/delete connections
+
   public CommandEditorPanel(@NotNull VirtualFile redisFile) {
     this.redisFile = redisFile;
     createConfigureLabels();
@@ -36,10 +38,9 @@ public class CommandEditorPanel extends EditorNotificationPanel {
 
     if (selectedConnection != null) {
       text("Selected redis connection: " + selectedConnection.getUniName()).icon(AllIcons.General.NotificationInfo);
-      return;
+    } else {
+      text("You should select one redis connection.").icon(AllIcons.General.NotificationError);
     }
-
-    text("You should select one redis connection.").icon(AllIcons.General.NotificationError);
 
     HyperlinkLabel label = new HyperlinkLabel("Select Connection", getBackground());
     label.addHyperlinkListener(new HyperlinkAdapter() {

@@ -45,7 +45,7 @@ public class SelectConnectionPopupAction extends DumbAwareAction {
     List<Connection> connectionList = storage.getConnections();
 
     Map<String, AnAction> actionName2action =
-        connectionList.stream().collect(Collectors.toMap(Connection::getName, SelectConnectionAction::new));
+        connectionList.stream().collect(Collectors.toMap(Connection::getUniName, SelectConnectionAction::new));
 
     ListPopup runActionsPopup = JBPopupFactory.getInstance().createListPopup(
         new BaseListPopupStep<String>("Connections", new ArrayList<>(actionName2action.keySet())) {

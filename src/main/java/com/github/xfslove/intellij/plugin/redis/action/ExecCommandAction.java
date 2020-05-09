@@ -1,6 +1,5 @@
 package com.github.xfslove.intellij.plugin.redis.action;
 
-import com.github.xfslove.intellij.plugin.redis.lang.RedisTypes;
 import com.github.xfslove.intellij.plugin.redis.script.CommandIterator;
 import com.github.xfslove.intellij.plugin.redis.script.CommandModel;
 import com.github.xfslove.intellij.plugin.redis.ui.InEditorResultUi;
@@ -18,6 +17,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.ui.content.Content;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @author wongiven
+ */
 public class ExecCommandAction extends DumbAwareAction {
 
   private final PsiElement element;

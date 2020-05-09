@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.client.RedisConnectionHolder;
+import com.github.xfslove.intellij.plugin.redis.client.RedisClientHolder;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -51,15 +51,13 @@ public class ConfigurationPanel extends JPanel {
       progressManager.runProcessWithProgressSynchronously(() -> {
         Connection connection = new Connection();
         apply(connection);
-        connection.oneTimePassword(getPasswordField());
 
         final ProgressIndicator progressIndicator = progressManager.getProgressIndicator();
         if (progressIndicator != null) {
           progressIndicator.setText("Connecting to " + connection.getUrl());
         }
         try {
-          RedisConnectionHolder redisClient = ServiceManager.getService(project, RedisConnectionHolder.class);
-          if (!redisClient.getClient(connection).test()) {
+          if (!RedisClientHolder.newClient(connection).test()) {
             excRef.set(new Exception("ping failure"));
           }
         } catch (Exception ex) {
@@ -148,6 +146,12 @@ public class ConfigurationPanel extends JPanel {
     return null;
   }
 
+  private void setPasswordField(String password) {
+    if (StringUtils.isNotBlank(password)) {
+      passwordField.setText(password);
+    }
+  }
+
   public ValidationInfo doValidate() {
 
     if (StringUtils.isBlank(getNameField())) {
@@ -160,11 +164,11 @@ public class ConfigurationPanel extends JPanel {
 
     if (isClusterCheckBoxSelected()) {
 
-      String[] nodes = urlField.split(";");
+      String[] nodes = urlField.split(",");
       for (String node : nodes) {
         String[] hp = node.split(":");
         if (hp.length != 2) {
-          return new ValidationInfo("url must be host:port1;host:port2;...");
+          return new ValidationInfo("url must be host:port1,host:port2,...");
         }
       }
 
@@ -184,6 +188,7 @@ public class ConfigurationPanel extends JPanel {
     connection.setUrl(getUrlField());
     connection.setSavePassword(isSavePasswordCheckBoxSelected());
     connection.setCluster(isClusterCheckBoxSelected());
+    connection.storePasswordCache(getPasswordField());
   }
 
   public void load(Connection connection) {
@@ -191,5 +196,6 @@ public class ConfigurationPanel extends JPanel {
     setUrlField(connection.getUrl());
     setSavePasswordCheckBoxSelect(connection.isSavePassword());
     setClusterCheckBoxSelect(connection.isCluster());
+    setPasswordField(connection.retrievePasswordCache());
   }
 }

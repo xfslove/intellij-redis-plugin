@@ -20,59 +20,67 @@ import java.util.stream.Collectors;
  */
 public class RedisClusterClient extends RedisClient {
 
-  private final GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> pool;
+  private GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> pool;
 
   public RedisClusterClient(Connection connection) {
     super(connection);
-    pool = createPool();
   }
 
-  private GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> createPool() {
-    GenericObjectPoolConfig<StatefulRedisClusterConnection<byte[], byte[]>> config = new GenericObjectPoolConfig<>();
-    config.setMaxTotal(5);
-    config.setMaxIdle(1);
-    config.setMinIdle(1);
-    GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> pool = ConnectionPoolSupport.createGenericObjectPool(
-        () -> {
-          String[] urls = connection.getUrl().split(",");
-          String password = connection.retrievePassword();
-
-          List<RedisURI> uriList = Arrays.stream(urls).map(url -> {
-            String[] hp = url.split(":");
-            RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
-            if (StringUtils.isNotBlank(password)) {
-              uri.setPassword(password);
-            }
-            return uri;
-          }).collect(Collectors.toList());
-
-          return io.lettuce.core.cluster.RedisClusterClient.create(uriList).connect(new ByteArrayCodec());
-        },
-        config
-    );
-    Disposer.register(Disposer.newDisposable(), pool::close);
-    return pool;
+  @Override
+  public boolean test() throws Exception {
+    StatefulRedisClusterConnection<byte[], byte[]> c = createLettuceConnection(connection);
+    return "PONG".equals(c.sync().ping());
   }
 
   @Override
   public byte[] get(byte[] key) throws Exception {
     StatefulRedisClusterConnection<byte[], byte[]> c = null;
     try {
-      c = pool.borrowObject();
+      c = getPool().borrowObject();
       return c.sync().get(key);
     } finally {
-      if (c != null) { pool.returnObject(c); }
+      if (c != null) { getPool().returnObject(c); }
     }
   }
 
+  private GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> getPool() {
+    if (this.pool != null) {
+      return this.pool;
+    }
+
+    GenericObjectPoolConfig<StatefulRedisClusterConnection<byte[], byte[]>> config = new GenericObjectPoolConfig<>();
+    config.setMaxTotal(5);
+    config.setMaxIdle(1);
+    config.setMinIdle(1);
+    GenericObjectPool<StatefulRedisClusterConnection<byte[], byte[]>> pool = ConnectionPoolSupport.createGenericObjectPool(
+        () -> createLettuceConnection(connection),
+        config
+    );
+    Disposer.register(Disposer.newDisposable(), this);
+    this.pool = pool;
+    return this.pool;
+  }
+
+  private StatefulRedisClusterConnection<byte[], byte[]> createLettuceConnection(Connection connection) {
+    String[] urls = connection.getUrl().split(",");
+    String password = connection.retrievePassword();
+
+    List<RedisURI> uriList = Arrays.stream(urls).map(url -> {
+      String[] hp = url.split(":");
+      RedisURI uri = RedisURI.Builder.redis(hp[0], Integer.parseInt(hp[1])).build();
+      if (StringUtils.isNotBlank(password)) {
+        uri.setPassword(password);
+      }
+      return uri;
+    }).collect(Collectors.toList());
+
+    return io.lettuce.core.cluster.RedisClusterClient.create(uriList).connect(new ByteArrayCodec());
+  }
+
   @Override
-  public boolean test() throws Exception {
-    StatefulRedisClusterConnection<byte[], byte[]> c = null;
-    try {
-      c = pool.borrowObject();
-      return "PONG".equals(c.sync().ping());
-    } finally {
-      if (c != null) { pool.returnObject(c); }
+  public void dispose() {
+    if (pool != null) {
+      pool.close();
     }
   }
 }
