@@ -1,6 +1,6 @@
 package com.github.xfslove.intellij.plugin.redis.ui;
 
-import com.github.xfslove.intellij.plugin.redis.action.OpenCommandEditorAction;
+import com.github.xfslove.intellij.plugin.redis.action.NewRedisScratchAction;
 import com.github.xfslove.intellij.plugin.redis.action.DeleteConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.EditConnectionAction;
 import com.github.xfslove.intellij.plugin.redis.action.NewConnectionAction;
@@ -67,7 +67,7 @@ public class ExplorerPanel extends JPanel {
     actionGroup.add(new DeleteConnectionAction(this));
     actionGroup.add(new EditConnectionAction(this));
     actionGroup.add(new Separator());
-    actionGroup.add(new OpenCommandEditorAction(this));
+    actionGroup.add(new NewRedisScratchAction(this));
     actionGroup.add(new Separator());
     actionGroup.add(actionsManager.createExpandAllAction(redisServersExpander, rootPanel));
     actionGroup.add(actionsManager.createCollapseAllAction(redisServersExpander, rootPanel));
@@ -96,6 +96,14 @@ public class ExplorerPanel extends JPanel {
 
   public JPanel getExplorer() {
     return this.rootPanel;
+  }
+
+  public JPanel getToolbarPanel() {
+    return toolbarPanel;
+  }
+
+  public JPanel getTreePanel() {
+    return treePanel;
   }
 
   public void newConfiguration(Connection connection) {

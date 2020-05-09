@@ -35,6 +35,7 @@ public class CommandEditorPanel extends EditorNotificationPanel {
     Connection selectedConnection = redisFile.getUserData(ExplorerPanel.SELECTED_CONFIG);
 
     if (selectedConnection != null) {
+      text("Selected redis connection: " + selectedConnection.getUniName()).icon(AllIcons.General.NotificationInfo);
       return;
     }
 

@@ -2,12 +2,18 @@ package com.github.xfslove.intellij.plugin.redis.ui;
 
 import com.github.xfslove.intellij.plugin.redis.client.RedisConnectionHolder;
 import com.github.xfslove.intellij.plugin.redis.storage.Connection;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationType;
+import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.ui.popup.Balloon;
+import com.intellij.openapi.ui.popup.BalloonBuilder;
+import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.Ref;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -62,9 +68,30 @@ public class ConfigurationPanel extends JPanel {
       }, "Testing Connection", true, this.project);
 
       if (excRef.isNull()) {
-        Messages.showInfoMessage(rootPanel, "Connection Test Successful", "Connection Test Successful");
+
+        BalloonBuilder builder = JBPopupFactory.getInstance()
+            .createHtmlTextBalloonBuilder("Connection Test Successful", MessageType.INFO, null)
+            .setFadeoutTime(3000L);
+        builder.setDisposable(project);
+        Balloon errorBalloon = builder.createBalloon();
+        errorBalloon.show(JBPopupFactory.getInstance().guessBestPopupLocation(testConnectionButton), Balloon.Position.below);
+
       } else {
-        Messages.showErrorDialog(rootPanel, ExceptionUtils.getStackTrace(excRef.get()), "Connection Test Failed");
+
+        BalloonBuilder builder = JBPopupFactory.getInstance()
+            .createHtmlTextBalloonBuilder("Connection Test Failure", MessageType.ERROR, null)
+            .setFadeoutTime(3000L);
+        builder.setDisposable(project);
+        Balloon errorBalloon = builder.createBalloon();
+        errorBalloon.show(JBPopupFactory.getInstance().guessBestPopupLocation(testConnectionButton), Balloon.Position.below);
+
+        Notifications.Bus.notify(
+            new Notification(
+                "intellij-redis-plugin",
+                "",
+                ExceptionUtils.getStackTrace(excRef.get()),
+                NotificationType.ERROR)
+        );
       }
     });
   }

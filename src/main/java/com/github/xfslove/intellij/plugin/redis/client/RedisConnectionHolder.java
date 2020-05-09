@@ -14,7 +14,10 @@ public class RedisConnectionHolder {
   private static final Map<Connection, RedisClient> HOLDER = new ConcurrentHashMap<>(16);
 
   public RedisClient getClient(Connection connection) {
-    return HOLDER.putIfAbsent(connection, connection.isCluster() ? new RedisClusterClient(connection) : new RedisClient(connection));
+    if (HOLDER.containsKey(connection)) {
+      return HOLDER.get(connection);
+    }
+    return HOLDER.put(connection, connection.isCluster() ? new RedisClusterClient(connection) : new RedisClient(connection));
   }
 
 }
